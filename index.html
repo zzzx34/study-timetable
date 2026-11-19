@@ -1,0 +1,2515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>운양고 1학년 기말 스케줄표 · 투두리스트</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 가독성 최적화 웹폰트 (Noto Sans KR + Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* 기본 스타일 및 모바일 터치 최적화 */
+        body {
+            font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+
+        /* 가로 스크롤바 슬림화 */
+        .thin-scroll::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .thin-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .thin-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+
+        /* 캡처 모드 시 불필요한 UI 숨김 */
+        body.capture-mode .hide-on-capture {
+            display: none !important;
+        }
+        body.capture-mode main {
+            max-width: 1120px;
+            padding-top: 12px;
+        }
+
+        /* 잠금 상태일 때 본문 및 헤더 숨김 */
+        body.locked-state header,
+        body.locked-state main {
+            display: none !important;
+        }
+
+        /* =========================================================
+           고대비 흑백 모드 (E-Ink / 모노크롬 플래너 테마)
+           단순 그레이스케일이 아닌 명도·테두리 패턴으로 과목 완벽 구분
+        ========================================================= */
+        body.mono-mode {
+            background-color: #f4f4f5 !important;
+            color: #09090b !important;
+        }
+
+        body.mono-mode header,
+        body.mono-mode .surface-card {
+            background-color: #ffffff !important;
+            border-color: #d4d4d8 !important;
+            color: #09090b !important;
+        }
+
+        /* NOW 대시보드: 블랙 에디토리얼 카드 */
+        body.mono-mode #nowDashboard {
+            background: #18181b !important;
+            border-color: #09090b !important;
+            color: #ffffff !important;
+        }
+        body.mono-mode #nowDashboard .now-pill {
+            background-color: #ffffff !important;
+            color: #09090b !important;
+        }
+        body.mono-mode #nowDashboard .now-bar-fill {
+            background-color: #ffffff !important;
+        }
+        body.mono-mode #nowDashboard .now-btn-primary {
+            background-color: #ffffff !important;
+            color: #09090b !important;
+        }
+        body.mono-mode #nowDashboard .now-btn-secondary {
+            background-color: #27272a !important;
+            color: #f4f4f5 !important;
+            border-color: #3f3f46 !important;
+        }
+
+        /* 활성 탭 · 필터 · 요일 버튼 통일 */
+        body.mono-mode .tab-active,
+        body.mono-mode .filter-active,
+        body.mono-mode .day-active {
+            background-color: #18181b !important;
+            color: #ffffff !important;
+            border-color: #18181b !important;
+        }
+        body.mono-mode .day-today {
+            background-color: #e4e4e7 !important;
+            color: #09090b !important;
+            border-color: #18181b !important;
+        }
+
+        /* 흑백 모드 전용 과목별 명도 & 테두리 패턴 */
+        body.mono-mode .cat-school {
+            background-color: #f4f4f5 !important;
+            border: 1.5px dashed #a1a1aa !important;
+            color: #52525b !important;
+        }
+        body.mono-mode .cat-academy {
+            background-color: #18181b !important;
+            border: 1.5px solid #09090b !important;
+            color: #ffffff !important;
+        }
+        body.mono-mode .cat-homework {
+            background-color: #ffffff !important;
+            border: 1.5px solid #71717a !important;
+            border-left: 5px solid #18181b !important;
+            color: #18181b !important;
+        }
+        body.mono-mode .cat-social {
+            background-color: #e4e4e7 !important;
+            border: 1.5px solid #27272a !important;
+            color: #09090b !important;
+        }
+        body.mono-mode .cat-science {
+            background-color: #ffffff !important;
+            border: 2px solid #18181b !important;
+            color: #09090b !important;
+        }
+        body.mono-mode .cat-history {
+            background-color: #3f3f46 !important;
+            border: 1.5px solid #18181b !important;
+            color: #ffffff !important;
+        }
+        body.mono-mode .cat-etc {
+            background-color: #fafafa !important;
+            border: 1.5px dotted #52525b !important;
+            color: #27272a !important;
+        }
+
+        /* 완료 배지, 현재 시각 표시선, 강조 테두리 흑백 변환 */
+        body.mono-mode .check-done-badge {
+            background-color: #18181b !important;
+            color: #ffffff !important;
+            border: 1px solid #ffffff !important;
+        }
+        body.mono-mode .now-line {
+            background-color: #09090b !important;
+        }
+        body.mono-mode .now-dot {
+            background-color: #09090b !important;
+        }
+        body.mono-mode .now-highlight-ring {
+            box-shadow: 0 0 0 2.5px #09090b !important;
+        }
+        body.mono-mode .mono-gray {
+            filter: grayscale(100%);
+        }
+        body.mono-mode .mono-solid-black {
+            background-color: #18181b !important;
+            color: #ffffff !important;
+            border-color: #18181b !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-20 locked-state">
+
+    <!-- =========================================================
+         접속 비밀번호(PIN) 잠금 오버레이 (GitHub 공개용 프라이버시 보호)
+    ========================================================= -->
+    <div id="pinLockOverlay" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
+        <div class="surface-card bg-white w-full max-w-xs rounded-3xl p-6 shadow-2xl border border-slate-200 text-center space-y-4">
+            <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-xl mx-auto shadow-sm">
+                🔒
+            </div>
+            <div class="space-y-1">
+                <h2 class="text-base font-extrabold text-slate-900">개인 전용 학습 플래너</h2>
+                <p class="text-xs text-slate-500">접속 비밀번호를 입력해야 열립니다.</p>
+            </div>
+
+            <form onsubmit="submitPinUnlock(event)" class="space-y-3 text-left">
+                <div>
+                    <input type="password" id="pinInputField" inputmode="numeric" maxlength="16" autocomplete="off"
+                        placeholder="비밀번호 입력"
+                        class="w-full px-3.5 py-3 rounded-xl border border-slate-300 bg-slate-50 text-center text-base font-extrabold tracking-widest text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900">
+                    <p id="pinErrorMsg" class="hidden text-[11px] font-bold text-rose-600 text-center mt-1.5 mono-gray">
+                        비밀번호가 일치하지 않습니다.
+                    </p>
+                </div>
+
+                <label class="flex items-center justify-center gap-2 text-xs font-bold text-slate-600 cursor-pointer select-none">
+                    <input type="checkbox" id="rememberDeviceCheck" checked class="w-4 h-4 rounded accent-slate-900">
+                    <span>이 기기에서 잠금 해제 유지</span>
+                </label>
+
+                <button type="submit"
+                    class="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-extrabold transition-colors">
+                    🔓 잠금 해제
+                </button>
+            </form>
+
+            <p class="text-[11px] text-slate-400 pt-1 border-t border-slate-100">
+                초기 비밀번호: <strong class="text-slate-600">1209</strong> (접속 후 ⚙️ 관리에서 변경)
+            </p>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         상단 고정 헤더 (D-Day, 빠른 추가, 흑백 모드, 캡처 모드, 잠금)
+    ========================================================= -->
+    <header class="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-xs">
+        <div class="max-w-6xl mx-auto px-3 sm:px-5 py-2.5 flex items-center justify-between gap-2">
+            <!-- 좌측 학교 및 시험 정보 -->
+            <div class="flex items-center gap-2 min-w-0">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-xs sm:text-sm shrink-0">
+                    운양
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="text-sm sm:text-base font-extrabold text-slate-900 truncate">1학년 기말 플래너</h1>
+                        <span id="dDayBadge" class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-100 text-rose-700 shrink-0 mono-gray">
+                            D-19
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 truncate">시험: 12/9(수) ~ 12/16(수)</p>
+                </div>
+            </div>
+
+            <!-- 우측 빠른 액션 버튼들 -->
+            <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                <button type="button" onclick="openScheduleModal(null)"
+                    class="px-2 sm:px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[11px] sm:text-xs font-extrabold transition-colors">
+                    ＋ 일정
+                </button>
+                <button type="button" onclick="openTodoModal(null)"
+                    class="mono-solid-black px-2 sm:px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] sm:text-xs font-extrabold transition-colors">
+                    ＋ 투두
+                </button>
+                <button type="button" onclick="toggleMonoMode()"
+                    class="px-2 sm:px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-[11px] sm:text-xs font-bold text-slate-800 flex items-center gap-1 transition-colors"
+                    aria-label="흑백 모드 전환">
+                    <span id="monoIcon">◑</span>
+                    <span id="monoLabel">흑백</span>
+                </button>
+                <button type="button" onclick="toggleCaptureMode()"
+                    class="px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors"
+                    title="캡처 모드">
+                    📸
+                </button>
+                <button type="button" onclick="lockPlannerNow()"
+                    class="px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors"
+                    title="화면 즉시 잠금">
+                    🔒
+                </button>
+            </div>
+        </div>
+
+        <!-- 메인 4개 탭 바 -->
+        <div class="max-w-6xl mx-auto px-3 sm:px-5 pb-2 hide-on-capture">
+            <div class="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-xl">
+                <button type="button" id="tabBtn-timetable" onclick="switchMainTab('timetable')"
+                    class="tab-active py-2 rounded-lg text-[11px] sm:text-sm font-extrabold bg-indigo-600 text-white transition-colors">
+                    📅 시간표
+                </button>
+                <button type="button" id="tabBtn-todos" onclick="switchMainTab('todos')"
+                    class="py-2 rounded-lg text-[11px] sm:text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors flex items-center justify-center gap-1">
+                    <span>✅ 투두·수행</span>
+                    <span id="todoTabBadge" class="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold bg-rose-500 text-white mono-gray">0</span>
+                </button>
+                <button type="button" id="tabBtn-books" onclick="switchMainTab('books')"
+                    class="py-2 rounded-lg text-[11px] sm:text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors">
+                    📚 교재 6권
+                </button>
+                <button type="button" id="tabBtn-exam" onclick="switchMainTab('exam')"
+                    class="py-2 rounded-lg text-[11px] sm:text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors">
+                    🎯 시험기간
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- =========================================================
+         메인 콘텐츠 영역
+    ========================================================= -->
+    <main class="max-w-6xl mx-auto px-3 sm:px-5 pt-3.5 space-y-4">
+
+        <!-- 1) 실시간 NOW 대시보드 (현재 할 일 체크·수정 + 오늘 달성률 + 임박 수행평가 알림) -->
+        <section id="nowDashboard" class="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white p-4 shadow-sm border border-slate-800 hide-on-capture">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="space-y-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="nowBadge" class="now-pill px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500 text-white tracking-wide">
+                            NOW
+                        </span>
+                        <span id="liveClock" class="text-xs font-semibold text-slate-300">현재 시각 확인 중...</span>
+                    </div>
+                    <h2 id="nowTitle" class="text-base sm:text-lg font-extrabold leading-snug truncate">
+                        오늘 일정을 불러오는 중입니다
+                    </h2>
+                    <p id="nowSub" class="text-xs text-slate-300 leading-relaxed truncate">
+                        잠시만 기다려 주세요.
+                    </p>
+                </div>
+
+                <!-- 우측 원터치 체크 & 상세/수정 버튼 -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" id="nowCheckBtn" onclick="toggleNowTask()"
+                        class="now-btn-primary flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-500 hover:bg-emerald-400 text-white transition-colors">
+                        ✓ 지금 할 일 체크
+                    </button>
+                    <button type="button" id="nowDetailBtn" onclick="openNowTaskModal()"
+                        class="now-btn-secondary px-3 py-2.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-colors">
+                        상세·수정
+                    </button>
+                </div>
+            </div>
+
+            <!-- 오늘 달성률 프로그레스 바 & 전체 체크리스트 토글 -->
+            <div class="mt-3.5 pt-3 border-t border-white/15 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-slate-200">
+                        오늘 시간표 달성률
+                        <span id="todayProgressText" class="ml-1 text-emerald-300 font-extrabold mono-gray">0/0 (0%)</span>
+                    </span>
+                    <button type="button" onclick="toggleTodayChecklist()"
+                        class="text-[11px] font-bold text-slate-300 hover:text-white underline underline-offset-2">
+                        <span id="checklistToggleText">▼ 오늘 전체 체크 펼치기</span>
+                    </button>
+                </div>
+                <div class="w-full h-2 rounded-full bg-white/15 overflow-hidden">
+                    <div id="todayProgressBar" class="now-bar-fill h-full bg-emerald-400 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                </div>
+
+                <!-- 오늘 전체 할 일 펼침 목록 -->
+                <div id="todayChecklistPanel" class="hidden pt-2 space-y-1.5"></div>
+            </div>
+
+            <!-- 진행 중인 수행평가·마감 임박 투두 미니 바 -->
+            <div id="urgentTodoStrip" class="hidden mt-3 pt-2.5 border-t border-white/15 flex items-center justify-between gap-2 text-xs">
+                <button type="button" onclick="switchMainTab('todos')" class="flex items-center gap-1.5 min-w-0 text-left hover:underline">
+                    <span class="now-pill px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 text-[10px] font-extrabold shrink-0">수행·투두</span>
+                    <span id="urgentTodoText" class="truncate font-bold text-slate-100"></span>
+                </button>
+                <button type="button" onclick="switchMainTab('todos')" class="text-[11px] font-extrabold text-slate-300 hover:text-white shrink-0">
+                    전체 보기 ›
+                </button>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             TAB 1: 주간 시간표 섹션
+        ========================================================= -->
+        <section id="section-timetable" class="space-y-3">
+
+            <!-- 컨트롤 패널: 보기 모드 전환 + 관리 + 과목별 하이라이트 -->
+            <div class="surface-card bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 hide-on-capture">
+                    <div class="flex items-center justify-between sm:justify-start gap-2">
+                        <span class="text-xs font-extrabold text-slate-800">👀 보기 방식</span>
+                        <button type="button" onclick="openManageModal()"
+                            class="sm:hidden text-[11px] font-bold text-slate-500 hover:text-slate-900 underline">
+                            ⚙️ 초기화·복원
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="grid grid-cols-2 flex-1 sm:flex bg-slate-100 p-1 rounded-xl gap-1 text-xs font-extrabold">
+                            <button type="button" id="layoutBtn-day" onclick="setGridLayout('day')"
+                                class="px-3 py-2 sm:py-1.5 rounded-lg bg-white text-indigo-700 shadow-xs transition-colors">
+                                📱 요일별 (스크롤 X)
+                            </button>
+                            <button type="button" id="layoutBtn-week" onclick="setGridLayout('week')"
+                                class="px-3 py-2 sm:py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition-colors">
+                                📊 전체 7일 (가로 스크롤)
+                            </button>
+                        </div>
+                        <button type="button" onclick="openManageModal()"
+                            class="hidden sm:inline-flex px-2.5 py-1.5 rounded-lg border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-slate-100">
+                            ⚙️ 관리
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 과목별 집중 하이라이트 필터 -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold text-slate-800">🔍 과목별 집중 보기</span>
+                        <span class="text-[11px] text-slate-400">블록 터치 시 상세 확인 및 수정</span>
+                    </div>
+                    <div id="filterBar" class="flex flex-wrap gap-1.5"></div>
+                </div>
+            </div>
+
+            <!-- [모드 A] 요일별 집중 보기: 상단 고정 월~일 요일 선택 바 -->
+            <div id="daySelectorBar" class="hidden sticky top-[100px] sm:top-[104px] z-20 surface-card bg-white rounded-2xl p-1.5 border border-slate-200 shadow-sm flex justify-between gap-1"></div>
+
+            <!-- [모드 A] 요일별 집중 보기 카드 영역 (좌우 스와이프 지원) -->
+            <div id="singleDayWrapper" class="hidden"></div>
+
+            <!-- [모드 B] 전체 7일 가로 스크롤 에브리타임 그리드 -->
+            <div id="weekGridWrapper" class="surface-card bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                <div class="px-3.5 py-2.5 border-b border-slate-100 flex items-center justify-between text-[11px] text-slate-500 bg-slate-50/70">
+                    <span class="font-bold text-slate-700">📌 7일 전체 시간표 (블록 클릭 시 수정 가능)</span>
+                    <span class="sm:hidden font-semibold">← 좌우로 스크롤하세요 →</span>
+                </div>
+                <div class="overflow-x-auto thin-scroll">
+                    <div class="min-w-[780px] p-2.5 sm:p-3.5">
+                        <div id="weekDayHeaders" class="grid grid-cols-[48px_repeat(7,1fr)] gap-1.5 mb-2"></div>
+                        <div id="weekTimeGrid" class="grid grid-cols-[48px_repeat(7,1fr)] gap-1.5 relative"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 캡처 모드 종료 버튼 -->
+            <div id="captureExitBanner" class="hidden text-center pt-2">
+                <button type="button" onclick="toggleCaptureMode()"
+                    class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-extrabold shadow-md">
+                    캡처 모드 종료하기
+                </button>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             TAB 2: 투두리스트 & 기간제 수행평가 관리 섹션
+        ========================================================= -->
+        <section id="section-todos" class="hidden space-y-3">
+            <!-- 상단 요약 및 추가 카드 -->
+            <div class="surface-card bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-900">✅ 투두리스트 & 수행평가(기간제)</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">일일 할 일부터 시작일~마감일이 있는 수행평가·프로젝트까지 한 번에 관리하세요.</p>
+                    </div>
+                    <button type="button" onclick="openTodoModal(null)"
+                        class="mono-solid-black px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shrink-0 transition-colors">
+                        ＋ 새 투두 / 수행평가 추가
+                    </button>
+                </div>
+
+                <!-- 상태 요약 3칸 지표 -->
+                <div id="todoSummaryRow" class="grid grid-cols-3 gap-2 pt-1"></div>
+
+                <!-- 투두 필터 바 -->
+                <div id="todoFilterBar" class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-100"></div>
+            </div>
+
+            <!-- 투두 카드 목록 -->
+            <div id="todoListContainer" class="space-y-2.5"></div>
+        </section>
+
+        <!-- =========================================================
+             TAB 3: 탐구·한국사 6권 교재 진도 트래커
+        ========================================================= -->
+        <section id="section-books" class="hidden space-y-3">
+            <div class="surface-card bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-900">📚 탐구·한국사 6권 교재 운영 보드</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">시험 순서(통합사회 → 통합과학 → 한국사)에 맞춘 회독 체크리스트입니다.</p>
+                    </div>
+                    <span id="booksTotalStatus" class="px-2.5 py-1 rounded-lg bg-slate-100 text-xs font-extrabold text-slate-700 self-start sm:self-center">
+                        0 / 18 단계 완료
+                    </span>
+                </div>
+                <div id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             TAB 4: 시험 기간 (12/9 ~ 12/16) 직전 대비 로드맵
+        ========================================================= -->
+        <section id="section-exam" class="hidden space-y-3">
+            <div class="surface-card bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3">
+                <div>
+                    <h2 class="text-base font-extrabold text-slate-900">🎯 시험 기간(12/9 ~ 12/16) 오후 전략</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">운양고 1학년 2학기 2차 정기시험 시간표 기준, 12:30 하교 후 오후 배분입니다.</p>
+                </div>
+                <div id="examRoadmapList" class="space-y-2.5"></div>
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 leading-relaxed">
+                    <strong>💡 확인 포인트:</strong> 가정통신문 이미지상 <strong>12/14(월) 1교시</strong> 과목명이 흐릿하게 보입니다. 학교 원본 시간표에서 해당 과목명을 확인한 뒤, 12/11(금) 오후~12/13(일) 주말 계획에 포함해 주세요.
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- =========================================================
+         모달 1: 시간표 블록 상세 보기 모달
+    ========================================================= -->
+    <div id="detailModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeModalOnBackdrop(event, 'detailModal')">
+        <div class="surface-card bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-xl border border-slate-200 space-y-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="space-y-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span id="modalCategoryPill" class="px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-slate-100 text-slate-700">과목</span>
+                        <span id="modalTimeText" class="text-xs font-bold text-slate-500">월요일 20:30 ~ 22:00</span>
+                    </div>
+                    <h3 id="modalTitle" class="text-lg font-extrabold text-slate-900 break-words">일정 제목</h3>
+                </div>
+                <button type="button" onclick="closeModal('detailModal')"
+                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center shrink-0">
+                    ✕
+                </button>
+            </div>
+
+            <div class="space-y-2.5 text-sm">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="text-[11px] font-bold text-slate-500 mb-0.5">📖 사용 교재 / 내용</div>
+                    <div id="modalBook" class="font-extrabold text-slate-800"></div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="text-[11px] font-bold text-slate-500 mb-0.5">✨ 세부 학습 가이드 / 메모</div>
+                    <div id="modalTip" class="text-xs text-slate-700 leading-relaxed whitespace-pre-line"></div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+                <button type="button" id="modalToggleCompleteBtn" onclick="toggleModalTaskComplete()"
+                    class="flex-1 py-3 rounded-xl font-extrabold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors">
+                    ✓ 완료 체크
+                </button>
+                <button type="button" onclick="openEditFromDetail()"
+                    class="px-4 py-3 rounded-xl font-extrabold text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors mono-gray">
+                    ✏️ 수정
+                </button>
+                <button type="button" onclick="closeModal('detailModal')"
+                    class="px-3.5 py-3 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         모달 2: 시간표 일정 추가 / 수정 / 삭제 모달
+    ========================================================= -->
+    <div id="editModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto" onclick="closeModalOnBackdrop(event, 'editModal')">
+        <div class="surface-card bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-xl border border-slate-200 space-y-3.5 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 id="editModalHeading" class="text-base font-extrabold text-slate-900">✏️ 일정 수정하기</h3>
+                <button type="button" onclick="closeModal('editModal')"
+                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center">
+                    ✕
+                </button>
+            </div>
+
+            <div id="editFormError" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 mono-gray"></div>
+
+            <form id="scheduleEditForm" onsubmit="saveEditedSchedule(event)" class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-extrabold text-slate-700 mb-1">요일</label>
+                        <select id="editDay" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                            <option value="mon">월요일</option>
+                            <option value="tue">화요일</option>
+                            <option value="wed">수요일</option>
+                            <option value="thu">목요일</option>
+                            <option value="fri">금요일</option>
+                            <option value="sat">토요일</option>
+                            <option value="sun">일요일</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-extrabold text-slate-700 mb-1">과목 / 분류</label>
+                        <select id="editCat" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                            <option value="social">🌍 통합사회2</option>
+                            <option value="science">🔬 통합과학2</option>
+                            <option value="history">📜 한국사2</option>
+                            <option value="academy">🏫 학원 수업</option>
+                            <option value="homework">✏️ 학원 숙제</option>
+                            <option value="school">🏫 학교 수업</option>
+                            <option value="etc">☕ 기타 / 휴식</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-extrabold text-slate-700 mb-1">시작 시간</label>
+                        <input type="time" id="editStart" required
+                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                    </div>
+                    <div>
+                        <label class="block font-extrabold text-slate-700 mb-1">종료 시간</label>
+                        <input type="time" id="editEnd" required
+                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">일정 제목 *</label>
+                    <input type="text" id="editTitle" placeholder="예: 통합사회2, 수학 학원, 학교 수업" required maxlength="30"
+                        class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                </div>
+
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">한줄 요약 (블록 표시)</label>
+                    <input type="text" id="editSub" placeholder="예: 자이스토리 사회 2단원" maxlength="35"
+                        class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-800 focus:outline-none focus:border-slate-900">
+                </div>
+
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">사용 교재 / 준비물</label>
+                    <input type="text" id="editBook" placeholder="예: 완자 기출픽 과학, 학원 프린트" maxlength="50"
+                        class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-800 focus:outline-none focus:border-slate-900">
+                </div>
+
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">세부 학습 가이드 / 메모</label>
+                    <textarea id="editTip" rows="3" placeholder="이 시간에 집중할 목표나 오답 정리 방법을 적어주세요."
+                        class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white font-medium text-slate-800 focus:outline-none focus:border-slate-900"></textarea>
+                </div>
+
+                <div class="pt-2 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <button type="submit"
+                            class="flex-1 py-3 rounded-xl font-extrabold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors">
+                            💾 저장하기
+                        </button>
+                        <button type="button" onclick="closeModal('editModal')"
+                            class="px-4 py-3 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+                            취소
+                        </button>
+                    </div>
+
+                    <div id="deleteBlockArea" class="hidden pt-1 border-t border-slate-100">
+                        <button type="button" id="deleteStep1Btn" onclick="armDeleteBlock()"
+                            class="w-full py-2.5 rounded-xl font-bold text-xs text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 mono-gray">
+                            🗑️ 이 일정 삭제하기
+                        </button>
+                        <div id="deleteConfirmRow" class="hidden flex items-center gap-2">
+                            <button type="button" onclick="confirmDeleteBlock()"
+                                class="flex-1 py-2.5 rounded-xl font-extrabold text-xs bg-rose-600 text-white hover:bg-rose-700 mono-gray">
+                                정말 삭제할까요? (확인)
+                            </button>
+                            <button type="button" onclick="disarmDeleteBlock()"
+                                class="px-3.5 py-2.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-700">
+                                취소
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         모달 3: 투두리스트 & 기간제 수행평가 추가 / 수정 모달
+    ========================================================= -->
+    <div id="todoModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto" onclick="closeModalOnBackdrop(event, 'todoModal')">
+        <div class="surface-card bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-xl border border-slate-200 space-y-3.5 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 id="todoModalHeading" class="text-base font-extrabold text-slate-900">✅ 새 투두 / 수행평가 추가</h3>
+                <button type="button" onclick="closeModal('todoModal')"
+                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center">
+                    ✕
+                </button>
+            </div>
+
+            <div id="todoFormError" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 mono-gray"></div>
+
+            <form id="todoEditForm" onsubmit="saveTodoItem(event)" class="space-y-3 text-xs">
+                <!-- 유형 선택: 일반 투두 vs 기간제 수행평가 -->
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">유형 선택</label>
+                    <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl">
+                        <button type="button" id="todoTypeBtn-period" onclick="setTodoFormType('period')"
+                            class="py-2 rounded-lg font-extrabold bg-slate-900 text-white transition-colors">
+                            📌 수행평가 · 기간제
+                        </button>
+                        <button type="button" id="todoTypeBtn-single" onclick="setTodoFormType('single')"
+                            class="py-2 rounded-lg font-bold text-slate-600 hover:text-slate-900 transition-colors">
+                            📝 일반 투두 (단일)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 과목 선택 -->
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">과목</label>
+                    <select id="todoSubject" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                        <option value="통합사회2">🌍 통합사회2</option>
+                        <option value="통합과학2">🔬 통합과학2</option>
+                        <option value="한국사2">📜 한국사2</option>
+                        <option value="공통수학2">📐 공통수학2</option>
+                        <option value="공통영어2">🔤 공통영어2</option>
+                        <option value="공통국어2">📖 공통국어2</option>
+                        <option value="기타·생활">📌 기타 · 학교생활</option>
+                    </select>
+                </div>
+
+                <!-- 제목 -->
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">할 일 / 수행평가 제목 *</label>
+                    <input type="text" id="todoTitle" placeholder="예: 통합사회2 주제 탐구 보고서 제출" required maxlength="45"
+                        class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                </div>
+
+                <!-- 기간 설정 (기간제일 때 시작일~마감일, 일반일 때 목표 마감일) -->
+                <div id="todoPeriodDateBox" class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-extrabold text-slate-800">🗓️ 진행 기간 (시작일 ~ 마감일)</span>
+                        <div class="flex gap-1">
+                            <button type="button" onclick="applyPeriodPreset(3)" class="px-2 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-bold hover:bg-slate-100">+3일</button>
+                            <button type="button" onclick="applyPeriodPreset(7)" class="px-2 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-bold hover:bg-slate-100">+7일</button>
+                            <button type="button" onclick="applyExamPreset()" class="px-2 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-bold hover:bg-slate-100">12/8까지</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">시작일</label>
+                            <input type="date" id="todoStartDate"
+                                class="w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">마감일 (제출일)</label>
+                            <input type="date" id="todoEndDate"
+                                class="w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="todoSingleDateBox" class="hidden p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-extrabold text-slate-800">📅 목표 날짜 (선택)</span>
+                        <div class="flex gap-1">
+                            <button type="button" onclick="setSingleDateToday(0)" class="px-2 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-bold hover:bg-slate-100">오늘</button>
+                            <button type="button" onclick="setSingleDateToday(1)" class="px-2 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-bold hover:bg-slate-100">내일</button>
+                            <button type="button" onclick="clearSingleDate()" class="px-2 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-bold hover:bg-slate-100">날짜없음</button>
+                        </div>
+                    </div>
+                    <input type="date" id="todoTargetDate"
+                        class="w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
+                </div>
+
+                <!-- 세부 단계 체크리스트 (수행평가 분할 진행용) -->
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-extrabold text-slate-800">📋 세부 단계 (선택 · 진행률 자동 계산)</span>
+                        <button type="button" onclick="addSubtaskInputRow('')"
+                            class="px-2 py-1 rounded-lg bg-slate-900 text-white text-[10px] font-extrabold">
+                            ＋ 단계 추가
+                        </button>
+                    </div>
+                    <div id="subtaskInputsList" class="space-y-1.5"></div>
+                    <p class="text-[10px] text-slate-400">예: 자료 조사 → 초안 작성 → 인쇄 및 제출</p>
+                </div>
+
+                <!-- 메모 -->
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">메모 / 평가 기준</label>
+                    <textarea id="todoMemo" rows="2" placeholder="분량 제한, 제출 방식(클래스룸/출력물), 유의사항 등을 적어주세요."
+                        class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white font-medium text-slate-800 focus:outline-none focus:border-slate-900"></textarea>
+                </div>
+
+                <div class="flex items-center gap-2 pt-1">
+                    <button type="submit"
+                        class="flex-1 py-3 rounded-xl font-extrabold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors">
+                        💾 저장하기
+                    </button>
+                    <button type="button" onclick="closeModal('todoModal')"
+                        class="px-4 py-3 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+                        취소
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         모달 4: 데이터 관리 모달 (체크 초기화 / 기본 시간표 복원)
+    ========================================================= -->
+    <div id="manageModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onclick="closeModalOnBackdrop(event, 'manageModal')">
+        <div class="surface-card bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-slate-900">⚙️ 시간표 데이터 관리</h3>
+                <button type="button" onclick="closeModal('manageModal')"
+                    class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center">
+                    ✕
+                </button>
+            </div>
+
+            <div class="space-y-2.5">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                    <div class="text-xs font-extrabold text-slate-800">0) 접속 비밀번호(PIN) 변경</div>
+                    <p class="text-[11px] text-slate-500">이 기기의 비밀번호를 바꾸고, GitHub 코드에 영구 반영할 암호화 키를 복사할 수 있습니다.</p>
+                    <div class="flex items-center gap-1.5">
+                        <input type="password" id="newPinInput" inputmode="numeric" maxlength="16" placeholder="새 비밀번호 (4자 이상)"
+                            class="flex-1 px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:border-slate-900">
+                        <button type="button" onclick="updateCustomPin()"
+                            class="px-3 py-2 rounded-xl font-extrabold text-xs bg-slate-900 text-white hover:bg-slate-800 shrink-0">
+                            변경
+                        </button>
+                    </div>
+                    <div id="pinHashShareBox" class="hidden pt-1 space-y-1">
+                        <div class="text-[10px] font-bold text-slate-500">GitHub index.html의 DEFAULT_PIN_HASH 값:</div>
+                        <div class="flex items-center gap-1.5">
+                            <input type="text" id="pinHashOutput" readonly
+                                class="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-[11px] font-mono text-slate-700">
+                            <button type="button" onclick="copyPinHashToClipboard()"
+                                class="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-[11px] font-extrabold text-slate-800 shrink-0">
+                                복사
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                    <div class="text-xs font-extrabold text-slate-800">1) 주간 완료 체크만 초기화</div>
+                    <p class="text-[11px] text-slate-500">수정해 둔 시간표 블록은 유지하고 완료 체크(✓)만 모두 해제합니다.</p>
+                    <button type="button" onclick="resetChecksOnly()"
+                        class="w-full py-2 rounded-xl font-extrabold text-xs bg-slate-900 text-white hover:bg-slate-800">
+                        ↺ 완료 체크 초기화
+                    </button>
+                </div>
+
+                <div class="p-3 rounded-xl bg-rose-50/70 border border-rose-200 space-y-2 mono-gray">
+                    <div class="text-xs font-extrabold text-rose-800">2) 처음 기본 시간표로 되돌리기</div>
+                    <p class="text-[11px] text-rose-700">수정·추가·삭제한 시간표 일정을 지우고 처음 추천 스케줄표로 복원합니다.</p>
+                    <button type="button" id="restoreDefaultStep1" onclick="armRestoreDefault()"
+                        class="w-full py-2 rounded-xl font-extrabold text-xs bg-white text-rose-700 border border-rose-300 hover:bg-rose-100">
+                        기본 시간표로 복원하기
+                    </button>
+                    <button type="button" id="restoreDefaultConfirm" onclick="confirmRestoreDefault()"
+                        class="hidden w-full py-2 rounded-xl font-extrabold text-xs bg-rose-600 text-white hover:bg-rose-700">
+                        네, 처음 시간표로 복원합니다 (클릭)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 하단 토스트 알림 -->
+    <div id="toastBox" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-lg whitespace-nowrap">
+        알림 메시지
+    </div>
+
+    <!-- =========================================================
+         JavaScript 애플리케이션 전체 로직
+    ========================================================= -->
+    <script>
+        /* ---------------------------------------------------------
+           1. 상수 및 기본 데이터
+        --------------------------------------------------------- */
+        const STORAGE_KEYS = {
+            SCHEDULE: 'unyango_v4_custom_schedule',
+            COMPLETED: 'unyango_v4_completed_blocks',
+            TODOS: 'unyango_v4_todos_list',
+            BOOKS: 'unyango_v4_books_progress',
+            MONO: 'unyango_v4_mono_mode',
+            LAYOUT: 'unyango_v4_grid_layout',
+            PIN_HASH: 'unyango_v4_pin_hash',
+            UNLOCKED_HASH: 'unyango_v4_unlocked_hash'
+        };
+
+        function computePinHash(pin) {
+            const str = String(pin || '');
+            let h1 = 0xdeadbeef ^ str.length;
+            let h2 = 0x41c6ce57 ^ str.length;
+            for (let i = 0; i < str.length; i++) {
+                const ch = str.charCodeAt(i);
+                h1 = Math.imul(h1 ^ ch, 2654435761);
+                h2 = Math.imul(h2 ^ ch, 1597334677);
+            }
+            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+            return (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
+        }
+
+        // 초기 비밀번호(1209)의 해시값 — 변경 후 ⚙️ 관리에서 복사한 해시로 교체하면 GitHub에도 영구 반영됩니다
+        const DEFAULT_PIN_HASH = computePinHash(String.fromCharCode(49, 50, 48, 57));
+
+        const PX_PER_MIN = 0.88;
+
+        const DAYS = [
+            { key: 'mon', jsDay: 1, label: '월', full: '월요일', badge: '영어 학원 + 사회·과학' },
+            { key: 'tue', jsDay: 2, label: '화', full: '화요일', badge: '수학 학원 + 숙제·과학' },
+            { key: 'wed', jsDay: 3, label: '수', full: '수요일', badge: '숙제 골든타임 + 영어' },
+            { key: 'thu', jsDay: 4, label: '목', full: '목요일', badge: '수학 학원 + 한국사' },
+            { key: 'fri', jsDay: 5, label: '금', full: '금요일', badge: '영어 학원 + 과학·한국사' },
+            { key: 'sat', jsDay: 6, label: '토', full: '토요일', badge: '수학 + 과학·사회 집중' },
+            { key: 'sun', jsDay: 0, label: '일', full: '일요일', badge: '국어 집중 + 한국사·오답' }
+        ];
+
+        const FILTERS = [
+            { key: 'all', label: '전체 보기' },
+            { key: 'academy', label: '🏫 학원 수업' },
+            { key: 'homework', label: '✏️ 학원 숙제' },
+            { key: 'social', label: '🌍 통합사회2' },
+            { key: 'science', label: '🔬 통합과학2' },
+            { key: 'history', label: '📜 한국사2' },
+            { key: 'school', label: '🏫 학교' }
+        ];
+
+        const TODO_FILTERS = [
+            { key: 'all', label: '전체' },
+            { key: 'active', label: '🔥 진행중' },
+            { key: 'period', label: '📌 수행평가(기간제)' },
+            { key: 'single', label: '📝 일반 투두' },
+            { key: 'done', label: '✅ 완료됨' }
+        ];
+
+        // 초기 기본 스케줄표 데이터
+        const DEFAULT_SCHEDULE = [
+            // 월요일
+            { id: 'mon-1', day: 'mon', start: '08:30', end: '17:00', cat: 'school', title: '학교 수업', sub: '자투리: 영단어', book: '학교 수업 + 영단어장', tip: '쉬는 시간·점심시간 10분씩 활용해 영어 학원 단어 시험 대비를 미리 끝내두세요.' },
+            { id: 'mon-2', day: 'mon', start: '18:00', end: '20:00', cat: 'academy', title: '영어 학원', sub: '공통영어2 정규', book: '영어 학원 교재', tip: '하교 후 17:00~18:00에 저녁 식사를 마치고 이동합니다. 수업 중 중요 지문 체크!' },
+            { id: 'mon-3', day: 'mon', start: '20:30', end: '22:00', cat: 'social', title: '통합사회2', sub: '자이스토리 사회', book: '자이스토리 사회', tip: '첫날 시험(12/9) 과목! 12월 첫째 주까지 1회독 완료 목표로 매일 1~2소단원씩 풉니다.' },
+            { id: 'mon-4', day: 'mon', start: '22:15', end: '23:45', cat: 'science', title: '통합과학2 + 영단어', sub: '완자 과학 / 기출픽', book: '완자 과학 · 완자 기출픽', tip: '과학 개념 확인 후 기출픽 기본 문항 풀이. 마지막 20분은 오늘 영어 학원 복습·단어 정리.' },
+
+            // 화요일
+            { id: 'tue-1', day: 'tue', start: '08:30', end: '17:00', cat: 'school', title: '학교 수업', sub: '자투리: 수학 오답', book: '학교 수업 + 수학 오답노트', tip: '수학 학원 가기 전 학교 자투리 시간에 지난 수업 틀린 문제 3~5개만 눈으로 복습하세요.' },
+            { id: 'tue-2', day: 'tue', start: '17:20', end: '20:20', cat: 'academy', title: '수학 학원', sub: '공통수학2 수업', book: '수학 학원 교재', tip: '하교 직후 바로 이동! 간단한 간식을 챙겨 집중력이 떨어지지 않게 관리하세요.' },
+            { id: 'tue-3', day: 'tue', start: '21:00', end: '22:20', cat: 'homework', title: '수학 학원 숙제', sub: '당일 수업 즉시 복습', book: '수학 학원 숙제', tip: '저녁 식사(20:20~21:00) 후 기억이 생생할 때 당일 진도 숙제의 60% 이상을 처리합니다.' },
+            { id: 'tue-4', day: 'tue', start: '22:30', end: '23:45', cat: 'science', title: '통합과학2', sub: '완자 기출픽 문풀', book: '완자 기출픽 과학', tip: '자주 틀리는 계산·자료 해석 문항에 별표를 쳐두고 주말에 1등급마스터로 보강하세요.' },
+
+            // 수요일
+            { id: 'wed-1', day: 'wed', start: '08:30', end: '17:00', cat: 'school', title: '학교 수업', sub: '자투리: 영단어·지문', book: '학교 수업 + 영어 지문', tip: '저녁 영어 학원 시험(단어·구문)을 학교 쉬는 시간에 미리 암기해 두세요.' },
+            { id: 'wed-2', day: 'wed', start: '17:20', end: '19:20', cat: 'homework', title: '숙제 골든타임', sub: '수학 40m + 영어 50m', book: '수학·영어 학원 숙제', tip: '평일 중 유일한 오후 여유 시간! 목요일 수학 숙제 마무리 + 오늘 영어 숙제를 끝내고 식사합니다.' },
+            { id: 'wed-3', day: 'wed', start: '20:00', end: '22:00', cat: 'academy', title: '영어 학원', sub: '공통영어2 정규', book: '영어 학원 교재', tip: '내신 서술형·어법 포인트 위주로 필기하고 모르는 구문은 바로 질문해 해결하세요.' },
+            { id: 'wed-4', day: 'wed', start: '22:20', end: '23:45', cat: 'social', title: '통합사회2', sub: '자이스토리 사회', book: '자이스토리 사회', tip: '문제 풀이 후 해설지의 오답 선지 분석까지 꼼꼼히 읽으며 개념 빈틈을 메우세요.' },
+
+            // 목요일
+            { id: 'thu-1', day: 'thu', start: '08:30', end: '17:00', cat: 'school', title: '학교 수업', sub: '자투리: 한국사 흐름', book: '학교 수업 + 한국사 요약', tip: '한국사는 시험 마지막 날(12/16)이므로 평일엔 틈틈이 연표와 핵심 사건 흐름만 익혀둡니다. (일찍 하교 시 수정 버튼으로 시간을 조정하세요!)' },
+            { id: 'thu-2', day: 'thu', start: '17:20', end: '20:20', cat: 'academy', title: '수학 학원', sub: '공통수학2 수업', book: '수학 학원 교재', tip: '시험 둘째 날(12/10) 과목입니다. 풀이 과정을 깔끔하게 적는 서술형 습관을 들이세요.' },
+            { id: 'thu-3', day: 'thu', start: '21:00', end: '22:20', cat: 'homework', title: '수학 학원 숙제', sub: '당일 수업 복습·유형', book: '수학 학원 숙제', tip: '저녁 식사 후 당일 배운 핵심 유형을 바로 풀어 토요일 오전 숙제 부담을 줄입니다.' },
+            { id: 'thu-4', day: 'thu', start: '22:30', end: '23:45', cat: 'history', title: '한국사2', sub: '1등급마스터 한국사', book: '1등급마스터 한국사', tip: '핵심 개념 정리 + 기출 대표 문항 위주로 빠르게 1회독 진도를 나갑니다.' },
+
+            // 금요일
+            { id: 'fri-1', day: 'fri', start: '08:30', end: '17:00', cat: 'school', title: '학교 수업', sub: '자투리: 사·과 오답', book: '학교 수업 + 오답 체크', tip: '월~목요일 동안 사회·과학에서 틀렸던 문제들을 가볍게 다시 눈으로 훑어봅니다.' },
+            { id: 'fri-2', day: 'fri', start: '18:00', end: '20:00', cat: 'academy', title: '영어 학원', sub: '공통영어2 정규', book: '영어 학원 교재', tip: '주중 마지막 영어 수업! 주말 동안 할 숙제 범위와 시험 범위를 정확히 체크해 오세요.' },
+            { id: 'fri-3', day: 'fri', start: '20:30', end: '22:00', cat: 'science', title: '통합과학2', sub: '완자 과학 / 기출픽', book: '완자 과학 · 기출픽', tip: '이번 주 학교에서 배운 과학 진도를 완자로 정리하고 기출픽 문제를 이어서 풉니다.' },
+            { id: 'fri-4', day: 'fri', start: '22:15', end: '23:45', cat: 'history', title: '한국사2', sub: '1등급마스터 / 자이', book: '1등급마스터 · 자이스토리', tip: '1등급마스터 단원 마무리를 끝내고, 헷갈리는 사료 위주로 자이스토리 문항을 발췌 풀이합니다.' },
+
+            // 토요일
+            { id: 'sat-1', day: 'sat', start: '09:30', end: '11:00', cat: 'homework', title: '수학 숙제 마감', sub: '수업 전 오답 점검', book: '수학 학원 숙제', tip: '토요일 수학 학원 가기 전 남은 숙제를 끝내고, 못 푼 질문 문항에 포스트잇을 붙여둡니다.' },
+            { id: 'sat-2', day: 'sat', start: '11:30', end: '13:30', cat: 'academy', title: '수학 학원', sub: '공통수학2 주말반', book: '수학 학원 교재', tip: '질문 문항을 완벽히 해결하고, 주간 테스트 오답 원인을 바로 기록합니다.' },
+            { id: 'sat-3', day: 'sat', start: '14:30', end: '17:30', cat: 'science', title: '통합과학2 집중', sub: '기출픽 오답 + 1등급마스터', book: '완자 기출픽 · 1등급마스터', tip: '점심·휴식 후 3시간 집중! 기출픽 오답 정리 후 1등급마스터 고난도·서술형 변별력 문항을 선별해 풉니다.' },
+            { id: 'sat-4', day: 'sat', start: '19:00', end: '21:20', cat: 'social', title: '통합사회2 집중', sub: '자이스토리 주간 마감', book: '자이스토리 사회', tip: '저녁 식사 후 이번 주 목표 사회 분량을 완전히 마감합니다. 틀린 선지는 개념서에 형광펜 표시!' },
+            { id: 'sat-5', day: 'sat', start: '21:30', end: '23:00', cat: 'homework', title: '영어 숙제·주간 보충', sub: '밀린 과제 올클리어', book: '영어 학원 숙제', tip: '월요일 영어 학원 숙제를 미리 처리하고 이번 주에 밀린 과목이 있다면 보충합니다.' },
+
+            // 일요일
+            { id: 'sun-1', day: 'sun', start: '09:30', end: '10:30', cat: 'homework', title: '국어 직전 복습', sub: '지문 예습 및 이동', book: '국어 학원 교재', tip: '오전 국어 수업 전 지난주 배운 작품 핵심 정리와 어휘를 빠르게 훑어봅니다.' },
+            { id: 'sun-2', day: 'sun', start: '11:00', end: '13:00', cat: 'academy', title: '국어 학원 (오전)', sub: '공통국어2 수업', book: '국어 학원 교재', tip: '문학·문법 핵심 개념과 학교 필기 차이점을 비교하며 집중해서 듣습니다.' },
+            { id: 'sun-3', day: 'sun', start: '14:00', end: '16:00', cat: 'academy', title: '국어 학원 (오후)', sub: '공통국어2 수업', book: '국어 학원 교재', tip: '점심 식사(13:00~14:00) 후 오후 수업! 지문별 출제 포인트와 서술형 조건을 놓치지 마세요.' },
+            { id: 'sun-4', day: 'sun', start: '16:30', end: '18:30', cat: 'homework', title: '국어 당일 복습·숙제', sub: '평일 국어 부담 제로화', book: '국어 학원 숙제', tip: '일요일에 4시간 수업한 내용을 당일 저녁에 몰아서 복습·숙제까지 끝내두면 평일이 훨씬 편해집니다.' },
+            { id: 'sun-5', day: 'sun', start: '19:30', end: '21:20', cat: 'history', title: '한국사2 집중', sub: '자이스토리 한국사', book: '자이스토리 한국사', tip: '저녁 식사 후 사료 해석 문항 중심으로 자이스토리 한국사를 집중 풀이합니다.' },
+            { id: 'sun-6', day: 'sun', start: '21:30', end: '23:00', cat: 'science', title: '주간 오답 백지복습', sub: '사회·과학 핵심 총정리', book: '전 과목 오답 노트', tip: '일주일간 사회·과학에서 틀렸던 핵심 개념을 빈 종이에 써보며 다음 주를 준비합니다.' }
+        ];
+
+        // 6권 교재 진도 트래커 데이터
+        const TEXTBOOKS_DATA = [
+            { id: 'book-1', subject: '통합사회2 (시험 1일차 · 12/9)', title: '자이스토리 사회', priority: '최우선 완료', strategy: '첫날 시험 과목이므로 12/5(토)까지 전 범위 1회독과 오답 정리를 끝내야 합니다.', steps: ['시험범위 1회독 풀이', '틀린 선지 개념 복습', '시험 직전 오답 재풀이'] },
+            { id: 'book-2', subject: '통합과학2 (시험 3일차 · 12/11)', title: '완자 과학', priority: '개념 베이스', strategy: '학교 수업 진도에 맞춰 개념과 기본 확인 문제 위주로 빈틈을 잡는 용도로 활용하세요.', steps: ['전 단원 개념 정리', '기본·내신 만점 문제', '취약 단원 개념 재독'] },
+            { id: 'book-3', subject: '통합과학2 (시험 3일차 · 12/11)', title: '완자 기출픽 과학', priority: '핵심 주력', strategy: '가장 실전적인 내신 기출 교재입니다. 전 문항 풀이 후 틀린 문제 2회독을 목표로 잡으세요.', steps: ['기출 전 문항 1회독', '오답 문항 재풀이', '서술형 빈출 암기'] },
+            { id: 'book-4', subject: '통합과학2 (시험 3일차 · 12/11)', title: '1등급마스터 과학', priority: '고난도 선별', strategy: '시간을 아끼기 위해 전 문항 대신 고난도·자료해석·서술형 변별력 문항만 발췌해 푸세요.', steps: ['고난도 문항 선별 풀이', '서술형 킬러 점검', '시험 전날 오답 확인'] },
+            { id: 'book-5', subject: '한국사2 (시험 마지막날 · 12/16)', title: '1등급마스터 한국사', priority: '흐름·기출 핵심', strategy: '평일 밤에 핵심 흐름과 대표 기출을 빠르게 훑어 기본 점수를 확보하는 용도입니다.', steps: ['시대별 핵심 흐름 정리', '대표 기출 문제 완료', '연표·사료 암기 점검'] },
+            { id: 'book-6', subject: '한국사2 (시험 마지막날 · 12/16)', title: '자이스토리 한국사', priority: '취약 보충·마무리', strategy: '주말 및 시험 기간 주말(12/12~13)과 전날(12/15)에 취약 단원 실전 감각용으로 활용하세요.', steps: ['취약 단원 집중 풀이', '사료 해석 오답 정리', '12/15 최종 모의 점검'] }
+        ];
+
+        // 시험 기간 오후 전략 (12/9 ~ 12/16)
+        const EXAM_ROADMAP = [
+            { date: '12/9 (수)', exam: '통합사회2 (3교시)', after: '공통수학2 올인', detail: '12:30 하교 후 점심·낮잠 30분 → 학원 교재 및 학교 프린트 고난도·오답 최종 모의 풀이.' },
+            { date: '12/10 (목)', exam: '공통수학2 (3교시)', after: '통합과학2 올인', detail: '완자 기출픽 + 1등급마스터 별표 오답 집중 복습, 서술형 필수 키워드 백지 암기.' },
+            { date: '12/11 (금) ~ 12/13 (일)', exam: '통합과학2 (3교시) 후 주말', after: '월요일 과목(공통영어2 + 1교시) + 국어·한국사 기반', detail: '금 오후~토: 공통영어2 지문·어법·서술형 & 1교시 과목 마감 / 일: 국어 지문 점검 + 한국사 1회독.' },
+            { date: '12/14 (월)', exam: '1교시(원본 확인) · 공통영어2 (3교시)', after: '공통국어2 올인', detail: '12:30 하교 후 학교 학습활동, 문학 작품 표현법, 문법 예외 사례 최종 정리.' },
+            { date: '12/15 (화)', exam: '공통국어2 (3교시)', after: '한국사2 최종 암기', detail: '마지막 시험! 자이스토리·1등급마스터 오답 선지 + 시대별 연표·사료 완벽 암기.' },
+            { date: '12/16 (수)', exam: '한국사2 (2교시 종료)', after: '시험 종료 🎉', detail: '2교시(11:20) 종료 및 정답 확인 후 하교! (성적 확인 기간: 12/17 ~ 12/21)' }
+        ];
+
+        function createInitialTodos() {
+            const today = getTodayDateStr();
+            const plus5 = addDaysStr(today, 5);
+            const plus1 = addDaysStr(today, 1);
+            return [
+                {
+                    id: 'todo-sample-1',
+                    type: 'period',
+                    subject: '통합사회2',
+                    title: '[예시] 통합사회2 수행평가 보고서 제출',
+                    startDate: today,
+                    endDate: plus5,
+                    targetDate: '',
+                    memo: '상단 [수정] 버튼으로 실제 수행평가 일정과 단계로 바꿔서 사용해 보세요!',
+                    subtasks: [
+                        { text: '주제 선정 및 자료 조사', done: true },
+                        { text: '보고서 초안 작성', done: false },
+                        { text: '최종 검토 및 제출', done: false }
+                    ],
+                    completed: false
+                },
+                {
+                    id: 'todo-sample-2',
+                    type: 'single',
+                    subject: '공통영어2',
+                    title: '[예시] 영어 학원 단어 시험 암기',
+                    startDate: '',
+                    endDate: '',
+                    targetDate: plus1,
+                    memo: '학교 쉬는 시간 10분씩 쪼개서 암기하기',
+                    subtasks: [],
+                    completed: false
+                }
+            ];
+        }
+
+        /* ---------------------------------------------------------
+           2. 상태 관리 및 스토리지 헬퍼
+        --------------------------------------------------------- */
+        function loadStorage(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function saveStorage(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {
+                // 스토리지 제한 환경 예외 처리
+            }
+        }
+
+        function getTodayDateStr() {
+            const d = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        }
+
+        function addDaysStr(dateStr, days) {
+            const parts = dateStr.split('-').map(Number);
+            const d = new Date(parts[0], parts[1] - 1, parts[2]);
+            d.setDate(d.getDate() + days);
+            const pad = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        }
+
+        function formatShortDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${Number(parts[1])}/${Number(parts[2])}`;
+        }
+
+        function diffDaysFromToday(dateStr) {
+            if (!dateStr) return null;
+            const now = new Date();
+            const todayZero = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const target = new Date(y, m - 1, d);
+            return Math.round((target - todayZero) / (1000 * 60 * 60 * 24));
+        }
+
+        let scheduleList = loadStorage(STORAGE_KEYS.SCHEDULE, null) || JSON.parse(JSON.stringify(DEFAULT_SCHEDULE));
+        let completedBlocks = loadStorage(STORAGE_KEYS.COMPLETED, {});
+        let todoList = loadStorage(STORAGE_KEYS.TODOS, null) || createInitialTodos();
+        let bookProgress = loadStorage(STORAGE_KEYS.BOOKS, {});
+        let isMonoMode = loadStorage(STORAGE_KEYS.MONO, false);
+        let currentLayout = loadStorage(STORAGE_KEYS.LAYOUT, null);
+
+        let activeFilter = 'all';
+        let activeTodoFilter = 'all';
+        let selectedDayKey = 'mon';
+        let currentModalTaskId = null;
+        let editingTaskId = null;
+        let editingTodoId = null;
+        let todoFormType = 'period';
+        let currentNowTaskId = null;
+        let isTodayChecklistOpen = false;
+        let isCaptureMode = false;
+        let pendingDeleteTodoId = null;
+        let toastTimer = null;
+
+        /* ---------------------------------------------------------
+           3. 공통 유틸리티
+        --------------------------------------------------------- */
+        function toMin(timeStr) {
+            const [h, m] = timeStr.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        function getNowInfo() {
+            const now = new Date();
+            const dayObj = DAYS.find(d => d.jsDay === now.getDay()) || DAYS[0];
+            const hours = now.getHours();
+            const mins = now.getMinutes();
+            const pad = n => String(n).padStart(2, '0');
+            return {
+                dayKey: dayObj.key,
+                dayFull: dayObj.full,
+                minutes: hours * 60 + mins,
+                timeText: `${pad(hours)}:${pad(mins)}`
+            };
+        }
+
+        function updateDDay() {
+            const badge = document.getElementById('dDayBadge');
+            if (!badge) return;
+            const diffDays = diffDaysFromToday('2026-12-09');
+            if (diffDays > 0) badge.textContent = `D-${diffDays}`;
+            else if (diffDays === 0) badge.textContent = 'D-DAY';
+            else if (diffDays >= -7) badge.textContent = '시험 기간';
+            else badge.textContent = '시험 완료';
+        }
+
+        function getCategoryLabel(cat) {
+            const map = {
+                school: '학교 수업',
+                academy: '학원 수업',
+                homework: '학원 숙제',
+                social: '통합사회2',
+                science: '통합과학2',
+                history: '한국사2',
+                etc: '기타·휴식'
+            };
+            return map[cat] || '학습';
+        }
+
+        function getBlockStyleClass(cat) {
+            const styles = {
+                school: 'cat-school bg-slate-100 border border-slate-200 text-slate-600',
+                academy: 'cat-academy bg-indigo-600 border border-indigo-700 text-white',
+                homework: 'cat-homework bg-amber-50 border border-amber-300 text-amber-950',
+                social: 'cat-social bg-emerald-50 border border-emerald-300 text-emerald-950',
+                science: 'cat-science bg-sky-50 border border-sky-300 text-sky-950',
+                history: 'cat-history bg-violet-50 border border-violet-300 text-violet-950',
+                etc: 'cat-etc bg-rose-50 border border-rose-200 text-rose-950'
+            };
+            return styles[cat] || 'cat-etc bg-slate-50 border border-slate-200 text-slate-800';
+        }
+
+        function isItemHighlighted(item) {
+            return activeFilter === 'all' || item.cat === activeFilter;
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function showToast(msg) {
+            const box = document.getElementById('toastBox');
+            if (!box) return;
+            box.textContent = msg;
+            box.classList.remove('hidden');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                box.classList.add('hidden');
+            }, 2200);
+        }
+
+        /* ---------------------------------------------------------
+           4. 흑백 모드 / 캡처 모드 / 탭 & 레이아웃 전환
+        --------------------------------------------------------- */
+        function applyMonoMode() {
+            const label = document.getElementById('monoLabel');
+            const icon = document.getElementById('monoIcon');
+            if (isMonoMode) {
+                document.body.classList.add('mono-mode');
+                if (label) label.textContent = '컬러';
+                if (icon) icon.textContent = '🎨';
+            } else {
+                document.body.classList.remove('mono-mode');
+                if (label) label.textContent = '흑백';
+                if (icon) icon.textContent = '◑';
+            }
+        }
+
+        function toggleMonoMode() {
+            isMonoMode = !isMonoMode;
+            saveStorage(STORAGE_KEYS.MONO, isMonoMode);
+            applyMonoMode();
+            showToast(isMonoMode ? '◑ 고대비 흑백 모드가 켜졌습니다' : '🎨 컬러 모드로 전환되었습니다');
+        }
+
+        function toggleCaptureMode() {
+            isCaptureMode = !isCaptureMode;
+            document.body.classList.toggle('capture-mode', isCaptureMode);
+            const exitBanner = document.getElementById('captureExitBanner');
+            if (exitBanner) exitBanner.classList.toggle('hidden', !isCaptureMode);
+            if (isCaptureMode) {
+                switchMainTab('timetable');
+                setGridLayout('week', false);
+                showToast('📸 캡처 모드! 화면을 스크린샷하세요');
+            }
+        }
+
+        function switchMainTab(tab) {
+            ['timetable', 'todos', 'books', 'exam'].forEach(t => {
+                const sec = document.getElementById(`section-${t}`);
+                const btn = document.getElementById(`tabBtn-${t}`);
+                if (!sec || !btn) return;
+                if (t === tab) {
+                    sec.classList.remove('hidden');
+                    btn.className = 'tab-active py-2 rounded-lg text-[11px] sm:text-sm font-extrabold bg-indigo-600 text-white transition-colors flex items-center justify-center gap-1';
+                } else {
+                    sec.classList.add('hidden');
+                    btn.className = 'py-2 rounded-lg text-[11px] sm:text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors flex items-center justify-center gap-1';
+                }
+            });
+            if (tab === 'todos') renderTodoSection();
+        }
+
+        function setGridLayout(mode, shouldSave = true) {
+            currentLayout = mode;
+            if (shouldSave) saveStorage(STORAGE_KEYS.LAYOUT, mode);
+
+            const dayBtn = document.getElementById('layoutBtn-day');
+            const weekBtn = document.getElementById('layoutBtn-week');
+            const dayBar = document.getElementById('daySelectorBar');
+            const dayWrap = document.getElementById('singleDayWrapper');
+            const weekWrap = document.getElementById('weekGridWrapper');
+
+            const activeCls = 'px-3 py-2 sm:py-1.5 rounded-lg bg-white text-indigo-700 shadow-xs transition-colors';
+            const inactiveCls = 'px-3 py-2 sm:py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition-colors';
+
+            if (mode === 'day') {
+                dayBtn.className = activeCls;
+                weekBtn.className = inactiveCls;
+                dayBar.classList.remove('hidden');
+                dayWrap.classList.remove('hidden');
+                weekWrap.classList.add('hidden');
+                renderSingleDayView();
+            } else {
+                weekBtn.className = activeCls;
+                dayBtn.className = inactiveCls;
+                dayBar.classList.add('hidden');
+                dayWrap.classList.add('hidden');
+                weekWrap.classList.remove('hidden');
+                renderWeekGrid();
+            }
+        }
+
+        function setFilter(filterKey) {
+            activeFilter = filterKey;
+            renderFilterBar();
+            if (currentLayout === 'day') renderSingleDayView();
+            else renderWeekGrid();
+        }
+
+        function selectDay(dayKey) {
+            selectedDayKey = dayKey;
+            renderSingleDayView();
+        }
+
+        function refreshAllViews() {
+            renderNowDashboard();
+            renderFilterBar();
+            if (currentLayout === 'day') renderSingleDayView();
+            else renderWeekGrid();
+            renderTodoSection();
+        }
+
+        /* ---------------------------------------------------------
+           5. 실시간 NOW 대시보드 & 원터치 완료 체크
+        --------------------------------------------------------- */
+        function renderNowDashboard() {
+            const { dayKey, dayFull, minutes, timeText } = getNowInfo();
+            const clockEl = document.getElementById('liveClock');
+            const badgeEl = document.getElementById('nowBadge');
+            const titleEl = document.getElementById('nowTitle');
+            const subEl = document.getElementById('nowSub');
+            const checkBtn = document.getElementById('nowCheckBtn');
+            const detailBtn = document.getElementById('nowDetailBtn');
+
+            if (clockEl) clockEl.textContent = `${dayFull} ${timeText} 기준`;
+
+            const todayItems = scheduleList
+                .filter(i => i.day === dayKey)
+                .sort((a, b) => toMin(a.start) - toMin(b.start));
+
+            const activeItem = todayItems.find(i => minutes >= toMin(i.start) && minutes < toMin(i.end));
+            const nextItem = todayItems.find(i => toMin(i.start) > minutes);
+            const targetItem = activeItem || nextItem || todayItems[todayItems.length - 1];
+
+            currentNowTaskId = targetItem ? targetItem.id : null;
+
+            if (activeItem) {
+                const remain = toMin(activeItem.end) - minutes;
+                const h = Math.floor(remain / 60);
+                const m = remain % 60;
+                const remainStr = h > 0 ? `${h}시간 ${m}분 남음` : `${m}분 남음`;
+                badgeEl.textContent = `지금 진행 중 · ${remainStr}`;
+                titleEl.textContent = `${activeItem.title}${activeItem.sub ? ' — ' + activeItem.sub : ''}`;
+                subEl.textContent = `⏰ ${activeItem.start}~${activeItem.end} · 📖 ${activeItem.book || '교재 정보 없음'}`;
+            } else if (nextItem) {
+                const until = toMin(nextItem.start) - minutes;
+                const h = Math.floor(until / 60);
+                const m = until % 60;
+                const untilStr = h > 0 ? `${h}시간 ${m}분 후 시작` : `${m}분 후 시작`;
+                badgeEl.textContent = `휴식·이동 시간 · ${untilStr}`;
+                titleEl.textContent = `다음 일정: ${nextItem.title}${nextItem.sub ? ' (' + nextItem.sub + ')' : ''}`;
+                subEl.textContent = `⏰ ${nextItem.start}~${nextItem.end} · 📖 ${nextItem.book || '교재 정보 없음'}`;
+            } else if (targetItem) {
+                badgeEl.textContent = '오늘 일정 마감';
+                titleEl.textContent = '오늘 계획된 시간이 모두 끝났습니다 👏';
+                subEl.textContent = `마지막 일정(${targetItem.title}) 완료 여부를 체크하고 푹 쉬세요!`;
+            } else {
+                badgeEl.textContent = '일정 없음';
+                titleEl.textContent = '오늘 등록된 일정이 없습니다';
+                subEl.textContent = '우측 상단 [＋ 일정] 버튼으로 일정을 등록해 보세요.';
+            }
+
+            if (targetItem) {
+                const isDone = !!completedBlocks[targetItem.id];
+                checkBtn.classList.remove('hidden');
+                detailBtn.classList.remove('hidden');
+                if (isDone) {
+                    checkBtn.textContent = '✓ 완료됨 (취소)';
+                    checkBtn.className = 'now-btn-primary flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-500 text-white transition-colors';
+                } else {
+                    checkBtn.textContent = activeItem ? '☐ 지금 할 일 완료 체크' : '☐ 이 일정 완료 체크';
+                    checkBtn.className = 'now-btn-primary flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-indigo-500 hover:bg-indigo-400 text-white transition-colors';
+                }
+            } else {
+                checkBtn.classList.add('hidden');
+                detailBtn.classList.add('hidden');
+            }
+
+            // 오늘 전체 달성률
+            const doneCount = todayItems.filter(i => completedBlocks[i.id]).length;
+            const totalCount = todayItems.length;
+            const pct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+            document.getElementById('todayProgressText').textContent = `${doneCount}/${totalCount} (${pct}%)`;
+            document.getElementById('todayProgressBar').style.width = `${pct}%`;
+
+            // 오늘 전체 체크리스트 패널
+            const listPanel = document.getElementById('todayChecklistPanel');
+            if (listPanel) {
+                if (todayItems.length === 0) {
+                    listPanel.innerHTML = `<div class="text-xs text-slate-300 py-2 text-center">오늘 등록된 일정이 없습니다.</div>`;
+                } else {
+                    listPanel.innerHTML = todayItems.map(item => {
+                        const isDone = !!completedBlocks[item.id];
+                        const isNow = activeItem && activeItem.id === item.id;
+                        return `
+                            <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-white/10 border ${isNow ? 'border-white/50' : 'border-white/10'}">
+                                <button type="button" onclick="openDetailModal('${item.id}')" class="text-left min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5 text-[11px] text-slate-300 font-semibold">
+                                        ${isNow ? '<span class="px-1.5 py-0.2 rounded bg-white text-slate-900 text-[9px] font-extrabold">NOW</span>' : ''}
+                                        <span>${escapeHtml(item.start)}~${escapeHtml(item.end)}</span>
+                                        <span class="truncate opacity-80">· ${escapeHtml(item.book)}</span>
+                                    </div>
+                                    <div class="text-xs font-extrabold truncate ${isDone ? 'line-through opacity-60' : 'text-white'}">
+                                        ${escapeHtml(item.title)} ${item.sub ? `(${escapeHtml(item.sub)})` : ''}
+                                    </div>
+                                </button>
+                                <button type="button" onclick="toggleBlockComplete('${item.id}')"
+                                    class="px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold shrink-0 ${isDone ? 'bg-emerald-500 text-white mono-gray' : 'bg-white/20 text-white hover:bg-white/30'}">
+                                    ${isDone ? '✓ 완료' : '☐ 체크'}
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // 임박한 투두 / 수행평가 미니 스트립
+            const activeTodos = getSortedTodos().filter(t => !t.completed);
+            const tabBadge = document.getElementById('todoTabBadge');
+            if (tabBadge) {
+                tabBadge.textContent = activeTodos.length;
+                tabBadge.classList.toggle('hidden', activeTodos.length === 0);
+            }
+
+            const strip = document.getElementById('urgentTodoStrip');
+            const stripText = document.getElementById('urgentTodoText');
+            if (strip && stripText) {
+                if (activeTodos.length > 0) {
+                    const topTodo = activeTodos[0];
+                    const dInfo = getTodoDeadlineInfo(topTodo);
+                    strip.classList.remove('hidden');
+                    stripText.textContent = `[${topTodo.subject}] ${topTodo.title}${dInfo.badge ? ' (' + dInfo.badge + ')' : ''} 외 ${Math.max(0, activeTodos.length - 1)}건`;
+                } else {
+                    strip.classList.add('hidden');
+                }
+            }
+        }
+
+        function toggleTodayChecklist() {
+            isTodayChecklistOpen = !isTodayChecklistOpen;
+            const panel = document.getElementById('todayChecklistPanel');
+            const label = document.getElementById('checklistToggleText');
+            if (panel) panel.classList.toggle('hidden', !isTodayChecklistOpen);
+            if (label) label.textContent = isTodayChecklistOpen ? '▲ 오늘 전체 체크 접기' : '▼ 오늘 전체 체크 펼치기';
+        }
+
+        function toggleNowTask() {
+            if (!currentNowTaskId) return;
+            toggleBlockComplete(currentNowTaskId);
+        }
+
+        function openNowTaskModal() {
+            if (!currentNowTaskId) return;
+            openDetailModal(currentNowTaskId);
+        }
+
+        function toggleBlockComplete(id, event) {
+            if (event) event.stopPropagation();
+            if (completedBlocks[id]) delete completedBlocks[id];
+            else completedBlocks[id] = true;
+            saveStorage(STORAGE_KEYS.COMPLETED, completedBlocks);
+
+            refreshAllViews();
+            if (currentModalTaskId === id) updateDetailModalCheckBtn(id);
+            showToast(completedBlocks[id] ? '✓ 완료 체크되었습니다!' : '체크가 해제되었습니다');
+        }
+
+        /* ---------------------------------------------------------
+           6. 필터 바 & 요일별 집중 보기 (스크롤 X + 스와이프)
+        --------------------------------------------------------- */
+        function renderFilterBar() {
+            const bar = document.getElementById('filterBar');
+            if (!bar) return;
+            bar.innerHTML = FILTERS.map(f => {
+                const isActive = activeFilter === f.key;
+                return `
+                    <button type="button" onclick="setFilter('${f.key}')"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${isActive ? 'filter-active bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}">
+                        ${f.label}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderSingleDayView() {
+            const selectorBar = document.getElementById('daySelectorBar');
+            const wrapper = document.getElementById('singleDayWrapper');
+            if (!selectorBar || !wrapper) return;
+
+            const { dayKey: todayKey, minutes: nowMin } = getNowInfo();
+
+            selectorBar.innerHTML = DAYS.map(d => {
+                const isSelected = d.key === selectedDayKey;
+                const isToday = d.key === todayKey;
+                const dayItems = scheduleList.filter(i => i.day === d.key);
+                const doneCnt = dayItems.filter(i => completedBlocks[i.id]).length;
+                const allDone = dayItems.length > 0 && doneCnt === dayItems.length;
+
+                let btnClass = 'text-slate-600 hover:bg-slate-100 border border-transparent';
+                if (isSelected) btnClass = 'day-active bg-indigo-600 text-white shadow-xs border border-transparent';
+                else if (isToday) btnClass = 'day-today bg-rose-50 text-rose-700 border border-rose-200';
+
+                return `
+                    <button type="button" onclick="selectDay('${d.key}')"
+                        class="flex-1 py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-colors ${btnClass}">
+                        <div class="flex items-center gap-0.5 text-xs font-extrabold">
+                            <span>${d.label}</span>
+                            ${isToday ? `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-amber-300' : 'bg-rose-500'} mono-gray"></span>` : ''}
+                        </div>
+                        <span class="text-[10px] font-bold ${isSelected ? 'opacity-80' : allDone ? 'text-emerald-600 mono-gray' : 'text-slate-400'}">
+                            ${doneCnt}/${dayItems.length}
+                        </span>
+                    </button>
+                `;
+            }).join('');
+
+            const idx = DAYS.findIndex(d => d.key === selectedDayKey);
+            const dayObj = DAYS[idx] || DAYS[0];
+            const prevDay = DAYS[(idx + 6) % 7];
+            const nextDay = DAYS[(idx + 1) % 7];
+            const items = scheduleList
+                .filter(i => i.day === selectedDayKey)
+                .sort((a, b) => toMin(a.start) - toMin(b.start));
+
+            wrapper.innerHTML = `
+                <div id="swipeDayCard" class="surface-card bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200 shadow-xs space-y-3">
+                    <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                        <button type="button" onclick="selectDay('${prevDay.key}')"
+                            class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">
+                            ‹ ${prevDay.label}
+                        </button>
+                        <div class="text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <h3 class="text-base font-extrabold text-slate-900">${dayObj.full}</h3>
+                                ${dayObj.key === todayKey ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-rose-500 text-white mono-gray">오늘</span>' : ''}
+                            </div>
+                            <p class="text-[11px] font-semibold text-slate-500 mt-0.5">${dayObj.badge}</p>
+                        </div>
+                        <button type="button" onclick="selectDay('${nextDay.key}')"
+                            class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">
+                            ${nextDay.label} ›
+                        </button>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        ${items.length === 0 ? `
+                            <div class="py-10 text-center space-y-2">
+                                <p class="text-xs font-bold text-slate-400">이 요일에 등록된 일정이 없습니다.</p>
+                                <button type="button" onclick="openScheduleModal(null, '${dayObj.key}')"
+                                    class="px-3.5 py-2 rounded-xl bg-slate-900 text-white text-xs font-extrabold">
+                                    ＋ ${dayObj.full} 일정 추가하기
+                                </button>
+                            </div>
+                        ` : items.map(item => {
+                            const isDone = !!completedBlocks[item.id];
+                            const highlighted = isItemHighlighted(item);
+                            const isNow = dayObj.key === todayKey && nowMin >= toMin(item.start) && nowMin < toMin(item.end);
+                            const styleCls = getBlockStyleClass(item.cat);
+
+                            return `
+                                <div onclick="openDetailModal('${item.id}')"
+                                    class="p-3.5 rounded-2xl cursor-pointer transition-opacity ${styleCls} ${isNow ? 'now-highlight-ring ring-2 ring-rose-500' : ''} ${highlighted ? 'opacity-100' : 'opacity-25'}">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-1.5">
+                                            ${isNow ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-rose-500 text-white mono-gray">NOW</span>' : ''}
+                                            <span class="text-xs font-extrabold">${escapeHtml(item.start)} ~ ${escapeHtml(item.end)}</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5">
+                                            <button type="button" onclick="openScheduleModal('${item.id}', null, event)"
+                                                class="px-2 py-1 rounded-lg text-[11px] font-bold bg-black/10 hover:bg-black/20 text-current">
+                                                ✏️ 수정
+                                            </button>
+                                            <button type="button" onclick="toggleBlockComplete('${item.id}', event)"
+                                                class="px-2.5 py-1 rounded-lg text-xs font-extrabold ${isDone ? 'check-done-badge bg-emerald-600 text-white' : 'bg-black/15 text-current'}">
+                                                ${isDone ? '✓ 완료' : '☐ 체크'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm font-extrabold mt-1.5 ${isDone ? 'line-through opacity-70' : ''}">
+                                        ${escapeHtml(item.title)} ${item.sub ? `<span class="font-semibold opacity-90">· ${escapeHtml(item.sub)}</span>` : ''}
+                                    </div>
+                                    ${item.book ? `<p class="text-xs opacity-85 mt-1 leading-relaxed">📖 ${escapeHtml(item.book)}</p>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <div class="flex items-center justify-between pt-1 text-[11px] text-slate-400">
+                        <span>← 좌우로 밀어서(스와이프) 요일 이동</span>
+                        <button type="button" onclick="openScheduleModal(null, '${dayObj.key}')" class="font-extrabold text-slate-700 hover:underline">
+                            ＋ ${dayObj.label}요일 일정 추가
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const card = document.getElementById('swipeDayCard');
+            if (card) {
+                let startX = 0;
+                let startY = 0;
+                card.addEventListener('touchstart', e => {
+                    startX = e.changedTouches[0].screenX;
+                    startY = e.changedTouches[0].screenY;
+                }, { passive: true });
+                card.addEventListener('touchend', e => {
+                    const dx = e.changedTouches[0].screenX - startX;
+                    const dy = e.changedTouches[0].screenY - startY;
+                    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+                        selectDay(dx < 0 ? nextDay.key : prevDay.key);
+                    }
+                }, { passive: true });
+            }
+        }
+
+        /* ---------------------------------------------------------
+           7. 전체 7일 가로 스크롤 에브리타임 그리드
+        --------------------------------------------------------- */
+        function renderWeekGrid() {
+            const headersEl = document.getElementById('weekDayHeaders');
+            const gridEl = document.getElementById('weekTimeGrid');
+            if (!headersEl || !gridEl) return;
+
+            const { dayKey: todayKey, minutes: nowMin } = getNowInfo();
+
+            let minStart = 8 * 60 + 30;
+            let maxEnd = 24 * 60;
+            scheduleList.forEach(item => {
+                const s = toMin(item.start);
+                const e = toMin(item.end);
+                if (s < minStart) minStart = Math.floor(s / 60) * 60;
+                if (e > maxEnd) maxEnd = Math.min(24 * 60, Math.ceil(e / 60) * 60);
+            });
+
+            const totalHeight = Math.round((maxEnd - minStart) * PX_PER_MIN);
+
+            headersEl.innerHTML = `
+                <div class="text-[10px] font-bold text-slate-400 text-center self-end pb-1">시간</div>
+                ${DAYS.map(d => {
+                    const isToday = d.key === todayKey;
+                    const dayItems = scheduleList.filter(i => i.day === d.key);
+                    const doneCnt = dayItems.filter(i => completedBlocks[i.id]).length;
+                    return `
+                        <div class="py-1.5 px-1 rounded-xl text-center border ${isToday ? 'day-today bg-rose-50 border-rose-200 text-rose-700' : 'bg-slate-50 border-slate-200 text-slate-800'}">
+                            <div class="text-xs font-extrabold">${d.label} ${isToday ? '· 오늘' : ''}</div>
+                            <div class="text-[10px] opacity-75 font-bold">${doneCnt}/${dayItems.length} 완료</div>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+
+            const startHour = Math.ceil(minStart / 60);
+            const endHour = Math.floor(maxEnd / 60);
+            let timeMarksHtml = '';
+            for (let h = startHour; h <= endHour; h++) {
+                const topPx = Math.round((h * 60 - minStart) * PX_PER_MIN);
+                timeMarksHtml += `
+                    <div class="absolute right-1.5 text-[10px] font-bold text-slate-400 -translate-y-1/2" style="top: ${topPx}px;">
+                        ${String(h).padStart(2, '0')}:00
+                    </div>
+                `;
+            }
+
+            const columnsHtml = DAYS.map(d => {
+                const isToday = d.key === todayKey;
+                const items = scheduleList.filter(i => i.day === d.key);
+
+                let guideLines = '';
+                for (let h = startHour; h < endHour; h++) {
+                    const topPx = Math.round((h * 60 - minStart) * PX_PER_MIN);
+                    guideLines += `<div class="absolute inset-x-0 border-t border-slate-100 pointer-events-none" style="top: ${topPx}px;"></div>`;
+                }
+
+                let nowLineHtml = '';
+                if (isToday && nowMin >= minStart && nowMin <= maxEnd) {
+                    const lineTop = Math.round((nowMin - minStart) * PX_PER_MIN);
+                    nowLineHtml = `
+                        <div class="now-line absolute inset-x-0 h-[2px] bg-rose-500 z-20 pointer-events-none" style="top: ${lineTop}px;">
+                            <span class="now-dot absolute -left-1 -top-[3px] w-2 h-2 rounded-full bg-rose-500"></span>
+                        </div>
+                    `;
+                }
+
+                const blocksHtml = items.map(item => {
+                    const sMin = toMin(item.start);
+                    const eMin = toMin(item.end);
+                    const topPx = Math.round((sMin - minStart) * PX_PER_MIN);
+                    const heightPx = Math.max(36, Math.round((eMin - sMin) * PX_PER_MIN) - 2);
+                    const isDone = !!completedBlocks[item.id];
+                    const highlighted = isItemHighlighted(item);
+                    const isNow = isToday && nowMin >= sMin && nowMin < eMin;
+                    const styleCls = getBlockStyleClass(item.cat);
+                    const isCompact = heightPx < 56;
+
+                    return `
+                        <div onclick="openDetailModal('${item.id}')"
+                            style="top: ${topPx}px; height: ${heightPx}px;"
+                            class="absolute inset-x-0.5 rounded-xl p-1.5 cursor-pointer overflow-hidden flex flex-col justify-between transition-opacity ${styleCls} ${isNow ? 'now-highlight-ring ring-2 ring-rose-500 z-10' : ''} ${highlighted ? 'opacity-100' : 'opacity-20'}">
+                            <div class="flex items-start justify-between gap-1">
+                                <div class="min-w-0">
+                                    <div class="text-[11px] font-extrabold leading-tight truncate ${isDone ? 'line-through opacity-70' : ''}">
+                                        ${escapeHtml(item.title)}
+                                    </div>
+                                    ${!isCompact && item.sub ? `<div class="text-[10px] opacity-85 truncate mt-0.5">${escapeHtml(item.sub)}</div>` : ''}
+                                </div>
+                                <button type="button" onclick="toggleBlockComplete('${item.id}', event)"
+                                    title="완료 체크"
+                                    class="w-5 h-5 rounded-md text-[10px] font-extrabold flex items-center justify-center shrink-0 ${isDone ? 'check-done-badge bg-emerald-600 text-white' : 'bg-black/15 text-current'}">
+                                    ${isDone ? '✓' : ''}
+                                </button>
+                            </div>
+                            ${heightPx >= 72 ? `<div class="text-[9px] font-bold opacity-75 truncate">${escapeHtml(item.start)}~${escapeHtml(item.end)}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="relative rounded-xl border ${isToday ? 'border-slate-300 bg-slate-50/60' : 'border-slate-100 bg-white'}" style="height: ${totalHeight}px;">
+                        ${guideLines}
+                        ${nowLineHtml}
+                        ${blocksHtml}
+                    </div>
+                `;
+            }).join('');
+
+            gridEl.innerHTML = `
+                <div class="relative" style="height: ${totalHeight}px;">${timeMarksHtml}</div>
+                ${columnsHtml}
+            `;
+        }
+
+        /* ---------------------------------------------------------
+           8. 투두리스트 & 기간제 수행평가 렌더링 및 로직
+        --------------------------------------------------------- */
+        function getTodoDeadlineInfo(todo) {
+            const target = todo.type === 'period' ? todo.endDate : todo.targetDate;
+            if (!target) {
+                return { badge: '', urgencyClass: 'bg-slate-100 text-slate-600', sortWeight: 9999 };
+            }
+            const diff = diffDaysFromToday(target);
+            if (diff < 0) {
+                return {
+                    badge: `기한 지남 (D+${Math.abs(diff)})`,
+                    urgencyClass: 'bg-rose-600 text-white mono-solid-black',
+                    sortWeight: diff
+                };
+            }
+            if (diff === 0) {
+                return {
+                    badge: '오늘 마감!',
+                    urgencyClass: 'bg-rose-500 text-white mono-solid-black',
+                    sortWeight: 0
+                };
+            }
+            if (diff <= 3) {
+                return {
+                    badge: `D-${diff} 임박`,
+                    urgencyClass: 'bg-amber-500 text-white mono-solid-black',
+                    sortWeight: diff
+                };
+            }
+            return {
+                badge: `D-${diff}`,
+                urgencyClass: 'bg-indigo-100 text-indigo-800 border border-indigo-200 mono-gray',
+                sortWeight: diff
+            };
+        }
+
+        function getPeriodTimeProgress(startDate, endDate) {
+            if (!startDate || !endDate) return null;
+            const [sy, sm, sd] = startDate.split('-').map(Number);
+            const [ey, em, ed] = endDate.split('-').map(Number);
+            const startMs = new Date(sy, sm - 1, sd).getTime();
+            const endMs = new Date(ey, em - 1, ed).getTime();
+            const now = new Date();
+            const todayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+            if (endMs <= startMs) return todayMs >= endMs ? 100 : 0;
+            const ratio = ((todayMs - startMs) / (endMs - startMs)) * 100;
+            return Math.max(0, Math.min(100, Math.round(ratio)));
+        }
+
+        function getSortedTodos() {
+            return [...todoList].sort((a, b) => {
+                if (a.completed !== b.completed) return a.completed ? 1 : -1;
+                const wa = getTodoDeadlineInfo(a).sortWeight;
+                const wb = getTodoDeadlineInfo(b).sortWeight;
+                return wa - wb;
+            });
+        }
+
+        function setTodoFilter(key) {
+            activeTodoFilter = key;
+            renderTodoSection();
+        }
+
+        function renderTodoSection() {
+            const summaryRow = document.getElementById('todoSummaryRow');
+            const filterBar = document.getElementById('todoFilterBar');
+            const container = document.getElementById('todoListContainer');
+            if (!summaryRow || !filterBar || !container) return;
+
+            const activeCount = todoList.filter(t => !t.completed).length;
+            const periodCount = todoList.filter(t => !t.completed && t.type === 'period').length;
+            const doneCount = todoList.filter(t => t.completed).length;
+
+            summaryRow.innerHTML = `
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                    <div class="text-[11px] font-bold text-slate-500">진행 중</div>
+                    <div class="text-base font-extrabold text-slate-900 mt-0.5">${activeCount}개</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200 text-center mono-gray">
+                    <div class="text-[11px] font-bold text-indigo-700">📌 수행평가·기간제</div>
+                    <div class="text-base font-extrabold text-indigo-900 mt-0.5">${periodCount}개</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-center mono-gray">
+                    <div class="text-[11px] font-bold text-emerald-700">완료됨</div>
+                    <div class="text-base font-extrabold text-emerald-900 mt-0.5">${doneCount}개</div>
+                </div>
+            `;
+
+            filterBar.innerHTML = TODO_FILTERS.map(f => {
+                const isActive = activeTodoFilter === f.key;
+                return `
+                    <button type="button" onclick="setTodoFilter('${f.key}')"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${isActive ? 'filter-active bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}">
+                        ${f.label}
+                    </button>
+                `;
+            }).join('');
+
+            const filtered = getSortedTodos().filter(t => {
+                if (activeTodoFilter === 'active') return !t.completed;
+                if (activeTodoFilter === 'period') return t.type === 'period';
+                if (activeTodoFilter === 'single') return t.type === 'single';
+                if (activeTodoFilter === 'done') return t.completed;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="surface-card bg-white rounded-2xl p-8 border border-slate-200 text-center space-y-2.5">
+                        <p class="text-xs font-bold text-slate-400">해당 조건의 투두·수행평가 항목이 없습니다.</p>
+                        <button type="button" onclick="openTodoModal(null)"
+                            class="mono-solid-black px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-extrabold">
+                            ＋ 새 항목 추가하기
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(todo => {
+                const isPeriod = todo.type === 'period';
+                const dInfo = getTodoDeadlineInfo(todo);
+                const subtasks = Array.isArray(todo.subtasks) ? todo.subtasks : [];
+                const subDone = subtasks.filter(s => s.done).length;
+                const subPct = subtasks.length > 0 ? Math.round((subDone / subtasks.length) * 100) : (todo.completed ? 100 : 0);
+                const timePct = isPeriod ? getPeriodTimeProgress(todo.startDate, todo.endDate) : null;
+                const isConfirmingDel = pendingDeleteTodoId === todo.id;
+
+                return `
+                    <div class="surface-card bg-white rounded-2xl p-4 border ${isPeriod && !todo.completed ? 'border-l-4 border-l-indigo-600 border-slate-200' : 'border-slate-200'} shadow-xs space-y-2.5 ${todo.completed ? 'opacity-65' : ''}">
+                        <!-- 상단 배지 줄 -->
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${isPeriod ? 'mono-solid-black bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 border border-slate-200'}">
+                                    ${isPeriod ? '📌 수행평가 · 기간제' : '📝 일반 투두'}
+                                </span>
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-slate-100 text-slate-800">
+                                    ${escapeHtml(todo.subject)}
+                                </span>
+                                ${!todo.completed && dInfo.badge ? `
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${dInfo.urgencyClass}">
+                                        ${dInfo.badge}
+                                    </span>
+                                ` : ''}
+                            </div>
+
+                            <!-- 우측 완료 체크 & 수정/삭제 버튼 -->
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button type="button" onclick="openTodoModal('${todo.id}')"
+                                    class="px-2 py-1 rounded-lg text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">
+                                    ✏️ 수정
+                                </button>
+                                <button type="button" onclick="toggleTodoComplete('${todo.id}')"
+                                    class="px-2.5 py-1 rounded-lg text-xs font-extrabold ${todo.completed ? 'check-done-badge bg-emerald-600 text-white' : 'bg-slate-900 text-white hover:bg-slate-800'}">
+                                    ${todo.completed ? '✓ 완료' : '☐ 완료'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 제목 & 기간 표시 -->
+                        <div>
+                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 ${todo.completed ? 'line-through' : ''}">
+                                ${escapeHtml(todo.title)}
+                            </h3>
+                            ${isPeriod && (todo.startDate || todo.endDate) ? `
+                                <div class="mt-1.5 space-y-1">
+                                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-600">
+                                        <span>🗓️ 기간: ${formatShortDate(todo.startDate)} ~ ${formatShortDate(todo.endDate)}</span>
+                                        ${timePct !== null ? `<span>기간 경과 ${timePct}%</span>` : ''}
+                                    </div>
+                                    ${timePct !== null ? `
+                                        <div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                            <div class="mono-solid-black h-full bg-indigo-500 rounded-full" style="width: ${timePct}%;"></div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            ` : (!isPeriod && todo.targetDate ? `
+                                <p class="text-[11px] font-bold text-slate-500 mt-1">📅 목표일: ${formatShortDate(todo.targetDate)}</p>
+                            ` : '')}
+                        </div>
+
+                        <!-- 세부 단계 체크리스트 (있을 경우) -->
+                        ${subtasks.length > 0 ? `
+                            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                                <div class="flex items-center justify-between text-[11px] font-extrabold text-slate-700">
+                                    <span>세부 단계 진행률</span>
+                                    <span>${subDone}/${subtasks.length} (${subPct}%)</span>
+                                </div>
+                                <div class="space-y-1">
+                                    ${subtasks.map((st, sIdx) => `
+                                        <button type="button" onclick="toggleTodoSubtask('${todo.id}', ${sIdx})"
+                                            class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs font-bold transition-colors ${st.done ? 'bg-slate-200/70 text-slate-500 line-through' : 'bg-white border border-slate-200 text-slate-800 hover:bg-slate-100'}">
+                                            <span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 ${st.done ? 'mono-solid-black bg-emerald-600 text-white' : 'border border-slate-400 text-transparent'}">✓</span>
+                                            <span class="truncate">${escapeHtml(st.text)}</span>
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <!-- 메모 및 하단 삭제 액션 -->
+                        <div class="flex items-end justify-between gap-2 pt-0.5">
+                            <p class="text-xs text-slate-600 leading-relaxed flex-1">
+                                ${todo.memo ? escapeHtml(todo.memo) : '<span class="text-slate-400">메모 없음</span>'}
+                            </p>
+                            <div class="shrink-0">
+                                ${isConfirmingDel ? `
+                                    <div class="flex items-center gap-1">
+                                        <button type="button" onclick="confirmDeleteTodo('${todo.id}')"
+                                            class="px-2 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-extrabold mono-solid-black">
+                                            삭제 확인
+                                        </button>
+                                        <button type="button" onclick="cancelDeleteTodo()"
+                                            class="px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-bold">
+                                            취소
+                                        </button>
+                                    </div>
+                                ` : `
+                                    <button type="button" onclick="armDeleteTodo('${todo.id}')"
+                                        class="text-[11px] font-bold text-slate-400 hover:text-rose-600">
+                                        🗑️ 삭제
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleTodoComplete(id) {
+            const todo = todoList.find(t => t.id === id);
+            if (!todo) return;
+            todo.completed = !todo.completed;
+            saveStorage(STORAGE_KEYS.TODOS, todoList);
+            renderTodoSection();
+            renderNowDashboard();
+            showToast(todo.completed ? '✅ 투두가 완료 처리되었습니다!' : '진행 중으로 되돌렸습니다');
+        }
+
+        function toggleTodoSubtask(todoId, subIdx) {
+            const todo = todoList.find(t => t.id === todoId);
+            if (!todo || !todo.subtasks || !todo.subtasks[subIdx]) return;
+            todo.subtasks[subIdx].done = !todo.subtasks[subIdx].done;
+            // 모든 세부 단계를 완료하면 전체 투두도 자동 완료 제안/처리
+            if (todo.subtasks.length > 0 && todo.subtasks.every(s => s.done)) {
+                todo.completed = true;
+                showToast('🎉 모든 세부 단계를 마쳐 자동 완료되었습니다!');
+            } else if (todo.completed) {
+                todo.completed = false;
+            }
+            saveStorage(STORAGE_KEYS.TODOS, todoList);
+            renderTodoSection();
+            renderNowDashboard();
+        }
+
+        function armDeleteTodo(id) {
+            pendingDeleteTodoId = id;
+            renderTodoSection();
+        }
+
+        function cancelDeleteTodo() {
+            pendingDeleteTodoId = null;
+            renderTodoSection();
+        }
+
+        function confirmDeleteTodo(id) {
+            todoList = todoList.filter(t => t.id !== id);
+            pendingDeleteTodoId = null;
+            saveStorage(STORAGE_KEYS.TODOS, todoList);
+            renderTodoSection();
+            renderNowDashboard();
+            showToast('🗑️ 항목이 삭제되었습니다');
+        }
+
+        /* ---------------------------------------------------------
+           9. 투두 추가 / 수정 모달 로직
+        --------------------------------------------------------- */
+        function setTodoFormType(type) {
+            todoFormType = type;
+            const periodBtn = document.getElementById('todoTypeBtn-period');
+            const singleBtn = document.getElementById('todoTypeBtn-single');
+            const periodBox = document.getElementById('todoPeriodDateBox');
+            const singleBox = document.getElementById('todoSingleDateBox');
+
+            const activeCls = 'py-2 rounded-lg font-extrabold bg-slate-900 text-white transition-colors';
+            const inactiveCls = 'py-2 rounded-lg font-bold text-slate-600 hover:text-slate-900 transition-colors';
+
+            if (type === 'period') {
+                periodBtn.className = activeCls;
+                singleBtn.className = inactiveCls;
+                periodBox.classList.remove('hidden');
+                singleBox.classList.add('hidden');
+            } else {
+                singleBtn.className = activeCls;
+                periodBtn.className = inactiveCls;
+                singleBox.classList.remove('hidden');
+                periodBox.classList.add('hidden');
+            }
+        }
+
+        function applyPeriodPreset(days) {
+            const today = getTodayDateStr();
+            document.getElementById('todoStartDate').value = today;
+            document.getElementById('todoEndDate').value = addDaysStr(today, days);
+        }
+
+        function applyExamPreset() {
+            document.getElementById('todoStartDate').value = getTodayDateStr();
+            document.getElementById('todoEndDate').value = '2026-12-08';
+        }
+
+        function setSingleDateToday(offset) {
+            document.getElementById('todoTargetDate').value = addDaysStr(getTodayDateStr(), offset);
+        }
+
+        function clearSingleDate() {
+            document.getElementById('todoTargetDate').value = '';
+        }
+
+        function addSubtaskInputRow(textValue = '', isDone = false) {
+            const list = document.getElementById('subtaskInputsList');
+            if (!list) return;
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-1.5';
+            row.innerHTML = `
+                <input type="text" value="${escapeHtml(textValue)}" data-done="${isDone ? '1' : '0'}" placeholder="세부 단계 입력"
+                    class="subtask-input flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-medium text-slate-800">
+                <button type="button" onclick="this.parentElement.remove()"
+                    class="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs shrink-0">
+                    ✕
+                </button>
+            `;
+            list.appendChild(row);
+        }
+
+        function openTodoModal(id = null) {
+            editingTodoId = id;
+            const errBox = document.getElementById('todoFormError');
+            errBox.classList.add('hidden');
+            const subList = document.getElementById('subtaskInputsList');
+            subList.innerHTML = '';
+
+            if (id) {
+                const todo = todoList.find(t => t.id === id);
+                if (!todo) return;
+                document.getElementById('todoModalHeading').textContent = '✏️ 투두 · 수행평가 수정';
+                setTodoFormType(todo.type || 'period');
+                document.getElementById('todoSubject').value = todo.subject || '통합사회2';
+                document.getElementById('todoTitle').value = todo.title || '';
+                document.getElementById('todoStartDate').value = todo.startDate || getTodayDateStr();
+                document.getElementById('todoEndDate').value = todo.endDate || addDaysStr(getTodayDateStr(), 5);
+                document.getElementById('todoTargetDate').value = todo.targetDate || '';
+                document.getElementById('todoMemo').value = todo.memo || '';
+                (todo.subtasks || []).forEach(st => addSubtaskInputRow(st.text, st.done));
+            } else {
+                document.getElementById('todoModalHeading').textContent = '✅ 새 투두 / 수행평가 추가';
+                setTodoFormType('period');
+                document.getElementById('todoSubject').value = '통합사회2';
+                document.getElementById('todoTitle').value = '';
+                document.getElementById('todoStartDate').value = getTodayDateStr();
+                document.getElementById('todoEndDate').value = addDaysStr(getTodayDateStr(), 5);
+                document.getElementById('todoTargetDate').value = getTodayDateStr();
+                document.getElementById('todoMemo').value = '';
+            }
+
+            document.getElementById('todoModal').classList.remove('hidden');
+        }
+
+        function saveTodoItem(event) {
+            event.preventDefault();
+            const errBox = document.getElementById('todoFormError');
+            const title = document.getElementById('todoTitle').value.trim();
+            const subject = document.getElementById('todoSubject').value;
+            const memo = document.getElementById('todoMemo').value.trim();
+            const startDate = document.getElementById('todoStartDate').value;
+            const endDate = document.getElementById('todoEndDate').value;
+            const targetDate = document.getElementById('todoTargetDate').value;
+
+            if (!title) {
+                errBox.textContent = '⚠️ 할 일 또는 수행평가 제목을 입력해 주세요.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+            if (todoFormType === 'period' && startDate && endDate && startDate > endDate) {
+                errBox.textContent = '⚠️ 마감일은 시작일과 같거나 그 이후 날짜여야 합니다.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            const subtasks = Array.from(document.querySelectorAll('#subtaskInputsList .subtask-input'))
+                .map(inp => ({
+                    text: inp.value.trim(),
+                    done: inp.dataset.done === '1'
+                }))
+                .filter(s => s.text.length > 0);
+
+            if (editingTodoId) {
+                const idx = todoList.findIndex(t => t.id === editingTodoId);
+                if (idx !== -1) {
+                    todoList[idx] = {
+                        ...todoList[idx],
+                        type: todoFormType,
+                        subject,
+                        title,
+                        startDate: todoFormType === 'period' ? startDate : '',
+                        endDate: todoFormType === 'period' ? endDate : '',
+                        targetDate: todoFormType === 'single' ? targetDate : '',
+                        memo,
+                        subtasks
+                    };
+                }
+                showToast('💾 투두가 수정되었습니다!');
+            } else {
+                todoList.unshift({
+                    id: 'todo-' + Date.now(),
+                    type: todoFormType,
+                    subject,
+                    title,
+                    startDate: todoFormType === 'period' ? startDate : '',
+                    endDate: todoFormType === 'period' ? endDate : '',
+                    targetDate: todoFormType === 'single' ? targetDate : '',
+                    memo,
+                    subtasks,
+                    completed: false
+                });
+                showToast('✅ 새 투두가 추가되었습니다!');
+            }
+
+            saveStorage(STORAGE_KEYS.TODOS, todoList);
+            closeModal('todoModal');
+            renderTodoSection();
+            renderNowDashboard();
+        }
+
+        /* ---------------------------------------------------------
+           10. 시간표 상세 모달 & 시간표 일정 추가/수정/삭제 모달
+        --------------------------------------------------------- */
+        function openDetailModal(id) {
+            const item = scheduleList.find(i => i.id === id);
+            if (!item) return;
+            currentModalTaskId = id;
+
+            const dayObj = DAYS.find(d => d.key === item.day);
+            document.getElementById('modalCategoryPill').textContent = getCategoryLabel(item.cat);
+            document.getElementById('modalTimeText').textContent = `${dayObj ? dayObj.full : ''} ${item.start} ~ ${item.end}`;
+            document.getElementById('modalTitle').textContent = `${item.title}${item.sub ? ' — ' + item.sub : ''}`;
+            document.getElementById('modalBook').textContent = item.book || '지정된 교재 없음';
+            document.getElementById('modalTip').textContent = item.tip || '작성된 메모가 없습니다. [수정] 버튼을 눌러 학습 계획을 추가해 보세요.';
+
+            updateDetailModalCheckBtn(id);
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function updateDetailModalCheckBtn(id) {
+            const btn = document.getElementById('modalToggleCompleteBtn');
+            if (!btn) return;
+            const isDone = !!completedBlocks[id];
+            if (isDone) {
+                btn.textContent = '✓ 완료됨 (체크 해제)';
+                btn.className = 'flex-1 py-3 rounded-xl font-extrabold text-sm bg-emerald-600 text-white hover:bg-emerald-700 transition-colors mono-gray';
+            } else {
+                btn.textContent = '✓ 완료 체크하기';
+                btn.className = 'flex-1 py-3 rounded-xl font-extrabold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors';
+            }
+        }
+
+        function toggleModalTaskComplete() {
+            if (!currentModalTaskId) return;
+            toggleBlockComplete(currentModalTaskId);
+        }
+
+        function openEditFromDetail() {
+            const id = currentModalTaskId;
+            closeModal('detailModal');
+            if (id) openScheduleModal(id);
+        }
+
+        function openScheduleModal(id = null, presetDay = null, event = null) {
+            if (event) event.stopPropagation();
+            editingTaskId = id;
+
+            const errBox = document.getElementById('editFormError');
+            const deleteArea = document.getElementById('deleteBlockArea');
+            errBox.classList.add('hidden');
+            disarmDeleteBlock();
+
+            if (id) {
+                const item = scheduleList.find(i => i.id === id);
+                if (!item) return;
+                document.getElementById('editModalHeading').textContent = '✏️ 시간표 일정 수정';
+                document.getElementById('editDay').value = item.day;
+                document.getElementById('editCat').value = item.cat;
+                document.getElementById('editStart').value = item.start;
+                document.getElementById('editEnd').value = item.end;
+                document.getElementById('editTitle').value = item.title;
+                document.getElementById('editSub').value = item.sub || '';
+                document.getElementById('editBook').value = item.book || '';
+                document.getElementById('editTip').value = item.tip || '';
+                deleteArea.classList.remove('hidden');
+            } else {
+                document.getElementById('editModalHeading').textContent = '➕ 새 시간표 일정 추가';
+                document.getElementById('editDay').value = presetDay || selectedDayKey || 'mon';
+                document.getElementById('editCat').value = 'social';
+                document.getElementById('editStart').value = '20:00';
+                document.getElementById('editEnd').value = '21:30';
+                document.getElementById('editTitle').value = '';
+                document.getElementById('editSub').value = '';
+                document.getElementById('editBook').value = '';
+                document.getElementById('editTip').value = '';
+                deleteArea.classList.add('hidden');
+            }
+
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function saveEditedSchedule(event) {
+            event.preventDefault();
+            const errBox = document.getElementById('editFormError');
+            const day = document.getElementById('editDay').value;
+            const cat = document.getElementById('editCat').value;
+            const start = document.getElementById('editStart').value;
+            const end = document.getElementById('editEnd').value;
+            const title = document.getElementById('editTitle').value.trim();
+            const sub = document.getElementById('editSub').value.trim();
+            const book = document.getElementById('editBook').value.trim();
+            const tip = document.getElementById('editTip').value.trim();
+
+            if (!title) {
+                errBox.textContent = '⚠️ 일정 제목을 입력해 주세요.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+            if (toMin(end) <= toMin(start)) {
+                errBox.textContent = '⚠️ 종료 시간은 시작 시간보다 늦어야 합니다.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            if (editingTaskId) {
+                const idx = scheduleList.findIndex(i => i.id === editingTaskId);
+                if (idx !== -1) {
+                    scheduleList[idx] = { ...scheduleList[idx], day, cat, start, end, title, sub, book, tip };
+                }
+                showToast('💾 일정이 수정되었습니다!');
+            } else {
+                const newId = 'custom-' + Date.now();
+                scheduleList.push({ id: newId, day, cat, start, end, title, sub, book, tip });
+                selectedDayKey = day;
+                showToast('➕ 새 일정이 추가되었습니다!');
+            }
+
+            saveStorage(STORAGE_KEYS.SCHEDULE, scheduleList);
+            closeModal('editModal');
+            refreshAllViews();
+        }
+
+        function armDeleteBlock() {
+            document.getElementById('deleteStep1Btn').classList.add('hidden');
+            document.getElementById('deleteConfirmRow').classList.remove('hidden');
+        }
+
+        function disarmDeleteBlock() {
+            const s1 = document.getElementById('deleteStep1Btn');
+            const row = document.getElementById('deleteConfirmRow');
+            if (s1) s1.classList.remove('hidden');
+            if (row) row.classList.add('hidden');
+        }
+
+        function confirmDeleteBlock() {
+            if (!editingTaskId) return;
+            scheduleList = scheduleList.filter(i => i.id !== editingTaskId);
+            delete completedBlocks[editingTaskId];
+            saveStorage(STORAGE_KEYS.SCHEDULE, scheduleList);
+            saveStorage(STORAGE_KEYS.COMPLETED, completedBlocks);
+
+            closeModal('editModal');
+            refreshAllViews();
+            showToast('🗑️ 일정이 삭제되었습니다');
+        }
+
+        /* ---------------------------------------------------------
+           11. 교재 6권 보드 & 시험 기간 로드맵 렌더링
+        --------------------------------------------------------- */
+        function renderBooksBoard() {
+            const grid = document.getElementById('booksGrid');
+            const totalBadge = document.getElementById('booksTotalStatus');
+            if (!grid) return;
+
+            let totalSteps = 0;
+            let doneSteps = 0;
+
+            grid.innerHTML = TEXTBOOKS_DATA.map(book => {
+                const stepsHtml = book.steps.map((stepText, idx) => {
+                    const stepKey = `${book.id}-step-${idx}`;
+                    const checked = !!bookProgress[stepKey];
+                    totalSteps++;
+                    if (checked) doneSteps++;
+
+                    return `
+                        <button type="button" onclick="toggleBookStep('${stepKey}')"
+                            class="w-full flex items-center gap-2.5 p-2 rounded-xl text-left text-xs font-bold border transition-colors ${checked ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">
+                            <span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 ${checked ? 'bg-white text-slate-900' : 'border border-slate-400 text-transparent'}">✓</span>
+                            <span class="${checked ? 'line-through opacity-80' : ''}">${escapeHtml(stepText)}</span>
+                        </button>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-white space-y-2.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-500">${escapeHtml(book.subject)}</div>
+                                <h3 class="text-sm font-extrabold text-slate-900 mt-0.5">${escapeHtml(book.title)}</h3>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-slate-100 text-slate-800 border border-slate-200 shrink-0">
+                                ${escapeHtml(book.priority)}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(book.strategy)}</p>
+                        <div class="space-y-1.5 pt-1">${stepsHtml}</div>
+                    </div>
+                `;
+            }).join('');
+
+            if (totalBadge) totalBadge.textContent = `${doneSteps} / ${totalSteps} 단계 완료`;
+        }
+
+        function toggleBookStep(stepKey) {
+            if (bookProgress[stepKey]) delete bookProgress[stepKey];
+            else bookProgress[stepKey] = true;
+            saveStorage(STORAGE_KEYS.BOOKS, bookProgress);
+            renderBooksBoard();
+        }
+
+        function renderExamRoadmap() {
+            const list = document.getElementById('examRoadmapList');
+            if (!list) return;
+            list.innerHTML = EXAM_ROADMAP.map(row => `
+                <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-1">
+                    <div class="flex flex-wrap items-center justify-between gap-1.5">
+                        <span class="text-xs font-extrabold text-slate-900">${escapeHtml(row.date)} · ${escapeHtml(row.exam)}</span>
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-slate-900 text-white">${escapeHtml(row.after)}</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(row.detail)}</p>
+                </div>
+            `).join('');
+        }
+
+        /* ---------------------------------------------------------
+           12. 관리 모달 & 공통 모달 제어
+        --------------------------------------------------------- */
+        function openManageModal() {
+            document.getElementById('restoreDefaultStep1').classList.remove('hidden');
+            document.getElementById('restoreDefaultConfirm').classList.add('hidden');
+            const newPinInp = document.getElementById('newPinInput');
+            if (newPinInp) newPinInp.value = '';
+            const hashBox = document.getElementById('pinHashShareBox');
+            const hashOut = document.getElementById('pinHashOutput');
+            const savedCustomHash = loadStorage(STORAGE_KEYS.PIN_HASH, null);
+            if (savedCustomHash && hashBox && hashOut) {
+                hashOut.value = savedCustomHash;
+                hashBox.classList.remove('hidden');
+            } else if (hashBox) {
+                hashBox.classList.add('hidden');
+            }
+            document.getElementById('manageModal').classList.remove('hidden');
+        }
+
+        /* ---------------------------------------------------------
+           12-1. PIN 잠금 화면 및 비밀번호 변경 로직
+        --------------------------------------------------------- */
+        function getActivePinHash() {
+            return loadStorage(STORAGE_KEYS.PIN_HASH, null) || DEFAULT_PIN_HASH;
+        }
+
+        function initPinLockState() {
+            const activeHash = getActivePinHash();
+            const unlockedHash = loadStorage(STORAGE_KEYS.UNLOCKED_HASH, null);
+            if (unlockedHash && unlockedHash === activeHash) {
+                unlockScreenUI();
+            } else {
+                lockScreenUI();
+            }
+        }
+
+        function unlockScreenUI() {
+            document.body.classList.remove('locked-state');
+            const overlay = document.getElementById('pinLockOverlay');
+            if (overlay) overlay.classList.add('hidden');
+        }
+
+        function lockScreenUI() {
+            document.body.classList.add('locked-state');
+            const overlay = document.getElementById('pinLockOverlay');
+            const inp = document.getElementById('pinInputField');
+            const err = document.getElementById('pinErrorMsg');
+            if (overlay) overlay.classList.remove('hidden');
+            if (err) err.classList.add('hidden');
+            if (inp) {
+                inp.value = '';
+                setTimeout(() => inp.focus(), 60);
+            }
+        }
+
+        function submitPinUnlock(event) {
+            event.preventDefault();
+            const inp = document.getElementById('pinInputField');
+            const err = document.getElementById('pinErrorMsg');
+            const remember = document.getElementById('rememberDeviceCheck');
+            const entered = inp ? inp.value.trim() : '';
+            const activeHash = getActivePinHash();
+
+            if (computePinHash(entered) === activeHash) {
+                if (remember && remember.checked) {
+                    saveStorage(STORAGE_KEYS.UNLOCKED_HASH, activeHash);
+                } else {
+                    try { localStorage.removeItem(STORAGE_KEYS.UNLOCKED_HASH); } catch (e) {}
+                }
+                unlockScreenUI();
+                showToast('🔓 잠금이 해제되었습니다');
+            } else {
+                if (err) err.classList.remove('hidden');
+                if (inp) {
+                    inp.value = '';
+                    inp.focus();
+                }
+            }
+        }
+
+        function lockPlannerNow() {
+            try { localStorage.removeItem(STORAGE_KEYS.UNLOCKED_HASH); } catch (e) {}
+            lockScreenUI();
+        }
+
+        function updateCustomPin() {
+            const inp = document.getElementById('newPinInput');
+            const val = inp ? inp.value.trim() : '';
+            if (val.length < 4) {
+                showToast('⚠️ 비밀번호는 4자 이상 입력해 주세요');
+                return;
+            }
+            const newHash = computePinHash(val);
+            saveStorage(STORAGE_KEYS.PIN_HASH, newHash);
+            saveStorage(STORAGE_KEYS.UNLOCKED_HASH, newHash);
+
+            const hashBox = document.getElementById('pinHashShareBox');
+            const hashOut = document.getElementById('pinHashOutput');
+            if (hashBox && hashOut) {
+                hashOut.value = newHash;
+                hashBox.classList.remove('hidden');
+            }
+            if (inp) inp.value = '';
+            showToast('🔒 새 비밀번호가 저장되었습니다!');
+        }
+
+        function copyPinHashToClipboard() {
+            const hashOut = document.getElementById('pinHashOutput');
+            if (!hashOut) return;
+            hashOut.select();
+            hashOut.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('📋 암호화 키가 복사되었습니다');
+            } catch (e) {
+                showToast('복사에 실패했습니다. 직접 선택해 복사해 주세요');
+            }
+        }
+
+        function resetChecksOnly() {
+            completedBlocks = {};
+            saveStorage(STORAGE_KEYS.COMPLETED, completedBlocks);
+            closeModal('manageModal');
+            refreshAllViews();
+            showToast('↺ 주간 완료 체크가 모두 초기화되었습니다');
+        }
+
+        function armRestoreDefault() {
+            document.getElementById('restoreDefaultStep1').classList.add('hidden');
+            document.getElementById('restoreDefaultConfirm').classList.remove('hidden');
+        }
+
+        function confirmRestoreDefault() {
+            scheduleList = JSON.parse(JSON.stringify(DEFAULT_SCHEDULE));
+            completedBlocks = {};
+            saveStorage(STORAGE_KEYS.SCHEDULE, scheduleList);
+            saveStorage(STORAGE_KEYS.COMPLETED, completedBlocks);
+            closeModal('manageModal');
+            refreshAllViews();
+            showToast('✨ 처음 추천 시간표로 복원되었습니다');
+        }
+
+        function closeModal(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.classList.add('hidden');
+            if (modalId === 'detailModal') currentModalTaskId = null;
+            if (modalId === 'editModal') editingTaskId = null;
+            if (modalId === 'todoModal') editingTodoId = null;
+        }
+
+        function closeModalOnBackdrop(event, modalId) {
+            if (event.target && event.target.id === modalId) closeModal(modalId);
+        }
+
+        /* ---------------------------------------------------------
+           13. 초기화 실행
+        --------------------------------------------------------- */
+        window.addEventListener('DOMContentLoaded', () => {
+            const { dayKey } = getNowInfo();
+            selectedDayKey = dayKey;
+
+            applyMonoMode();
+            initPinLockState();
+            updateDDay();
+            renderBooksBoard();
+            renderExamRoadmap();
+            renderTodoSection();
+
+            // 모바일 화면에서는 요일별 보기를 기본값으로 자동 설정
+            const initialLayout = currentLayout || (window.innerWidth < 768 ? 'day' : 'week');
+            setGridLayout(initialLayout, false);
+
+            renderFilterBar();
+            renderNowDashboard();
+
+            // 30초마다 실시간 NOW 상태 갱신
+            setInterval(() => {
+                renderNowDashboard();
+                if (currentLayout === 'day') renderSingleDayView();
+                else renderWeekGrid();
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
