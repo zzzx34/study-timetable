@@ -174,6 +174,14 @@
         .safe-pb {
             padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
         }
+
+        /* 모바일(iOS/Android) 기본 time/date 입력창 너비 넘침·겹침 방지 */
+        input[type="time"],
+        input[type="date"] {
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body class="min-h-screen pb-20 locked-state">
@@ -565,10 +573,10 @@
             <div id="editFormError" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 mono-gray"></div>
 
             <form id="scheduleEditForm" onsubmit="saveEditedSchedule(event)" class="space-y-3 text-xs">
-                <div class="grid grid-cols-2 gap-2.5">
-                    <div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div class="min-w-0">
                         <label class="block font-extrabold text-slate-700 mb-1">요일</label>
-                        <select id="editDay" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                        <select id="editDay" class="w-full min-w-0 px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
                             <option value="mon">월요일</option>
                             <option value="tue">화요일</option>
                             <option value="wed">수요일</option>
@@ -578,9 +586,9 @@
                             <option value="sun">일요일</option>
                         </select>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <label class="block font-extrabold text-slate-700 mb-1">과목 / 분류</label>
-                        <select id="editCat" onchange="updateColorPreviewBar()" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                        <select id="editCat" onchange="updateColorPreviewBar()" class="w-full min-w-0 px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
                             <option value="social">🌍 통합사회2</option>
                             <option value="science">🔬 통합과학2</option>
                             <option value="history">📜 한국사2</option>
@@ -604,16 +612,16 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2.5">
-                    <div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div class="min-w-0">
                         <label class="block font-extrabold text-slate-700 mb-1">시작 시간</label>
                         <input type="time" id="editStart" required
-                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                            class="w-full min-w-0 max-w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <label class="block font-extrabold text-slate-700 mb-1">종료 시간</label>
                         <input type="time" id="editEnd" required
-                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                            class="w-full min-w-0 max-w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
                     </div>
                 </div>
 
@@ -657,16 +665,16 @@
                         <button type="button" id="deleteStep1Btn" onclick="armDeleteBlock()"
                             class="w-full py-2.5 rounded-xl font-bold text-xs text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 mono-gray">
                             🗑️ 이 일정 삭제하기
-                        </button>
-                        <div id="deleteConfirmRow" class="hidden flex items-center gap-2">
-                            <button type="button" onclick="confirmDeleteBlock()"
-                                class="flex-1 py-2.5 rounded-xl font-extrabold text-xs bg-rose-600 text-white hover:bg-rose-700 mono-gray">
-                                정말 삭제할까요? (확인)
-                            </button>
-                            <button type="button" onclick="disarmDeleteBlock()"
-                                class="px-3.5 py-2.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-700">
-                                취소
-                            </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div class="min-w-0">
+                            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">시작일</label>
+                            <input type="date" id="todoStartDate"
+                                class="w-full min-w-0 max-w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
+                        </div>
+                        <div class="min-w-0">
+                            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">마감일 (제출일)</label>
+                            <input type="date" id="todoEndDate"
+                                class="w-full min-w-0 max-w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
                         </div>
                     </div>
                 </div>
@@ -2233,517 +2241,84 @@
 
             if (editingTodoId) {
                 const idx = todoList.findIndex(t => t.id === editingTodoId);
-        function renderColorPalettePicker() {
-            const grid = document.getElementById('colorPaletteGrid');
-            if (!grid) return;
-
-            const isCustomHex = String(editingSelectedColor || '').startsWith('#');
-            const hexPickerVal = isCustomHex ? editingSelectedColor : '#3b82f6';
-
-            const swatchesHtml = COLOR_SWATCHES.map(sw => {
-                const isSelected = editingSelectedColor === sw.key;
-                if (sw.key === 'default') {
-                    return `
-                        <button type="button" onclick="selectScheduleColor('default')"
-                            class="px-2.5 h-8 rounded-xl text-[11px] font-extrabold border transition-all ${isSelected ? 'ring-2 ring-slate-900 border-slate-900 bg-white text-slate-900' : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100'}">
-                            자동
-                        </button>
-                    `;
-                }
-                return `
-                    <button type="button" onclick="selectScheduleColor('${sw.key}')"
-                        title="${sw.label}"
-                        style="background-color: ${sw.bg}; border-color: ${sw.border}; color: ${sw.text};"
-                        class="w-8 h-8 rounded-xl border text-xs font-extrabold flex items-center justify-center transition-transform ${isSelected ? 'ring-2 ring-offset-1 ring-slate-900 scale-105' : 'hover:scale-105'}">
-                        ${isSelected ? '✓' : ''}
-                    </button>
-                `;
-            }).join('');
-
-            grid.innerHTML = `
-                ${swatchesHtml}
-                <label title="원하는 색상 직접 선택"
-                    class="relative px-2.5 h-8 rounded-xl border text-[11px] font-extrabold flex items-center gap-1 cursor-pointer transition-all ${isCustomHex ? 'ring-2 ring-slate-900 border-slate-900 bg-white text-slate-900' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'}">
-                    <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0" style="background-color: ${hexPickerVal};"></span>
-                    <span>직접선택</span>
-                    <input type="color" value="${hexPickerVal}" onchange="onCustomHexColorPick(this.value)"
-                        class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
-                </label>
-            `;
-            updateColorPreviewBar();
-        }
-
-        function selectScheduleColor(colorKey) {
-            editingSelectedColor = colorKey;
-            renderColorPalettePicker();
-        }
-
-        function onCustomHexColorPick(hexVal) {
-            editingSelectedColor = hexVal;
-            renderColorPalettePicker();
-        }
-
-        function updateColorPreviewBar() {
-            const labelEl = document.getElementById('selectedColorName');
-            const previewEl = document.getElementById('colorPreviewPill');
-            const catEl = document.getElementById('editCat');
-            const titleEl = document.getElementById('editTitle');
-            if (!labelEl || !previewEl) return;
-
-            const currentCat = catEl ? catEl.value : 'social';
-            const previewTitle = (titleEl && titleEl.value.trim()) ? titleEl.value.trim() : '선택한 일정 블록 미리보기';
-            const app = getBlockAppearance({ cat: currentCat, color: editingSelectedColor });
-
-            if (!editingSelectedColor || editingSelectedColor === 'default') {
-                labelEl.textContent = '과목 기본색 (자동)';
-            } else if (String(editingSelectedColor).startsWith('#')) {
-                labelEl.textContent = `사용자 지정 (${editingSelectedColor.toUpperCase()})`;
-            } else {
-                const found = COLOR_SWATCHES.find(s => s.key === editingSelectedColor);
-                labelEl.textContent = found ? found.label : editingSelectedColor;
-            }
-
-            previewEl.className = `px-3 py-2 rounded-xl text-xs font-extrabold truncate transition-colors ${app.className}`;
-            previewEl.setAttribute('style', app.inlineStyle);
-            previewEl.textContent = `📌 ${previewTitle}`;
-        }
-
-        function openScheduleModal(id = null, presetDay = null, event = null) {
-            if (event) event.stopPropagation();
-            editingTaskId = id;
-
-            const errBox = document.getElementById('editFormError');
-            const deleteArea = document.getElementById('deleteBlockArea');
-            errBox.classList.add('hidden');
-            disarmDeleteBlock();
-
-            if (id) {
-                const item = scheduleList.find(i => i.id === id);
-                if (!item) return;
-                document.getElementById('editModalHeading').textContent = '✏️ 시간표 일정 수정';
-                document.getElementById('editDay').value = item.day;
-                document.getElementById('editCat').value = item.cat;
-                document.getElementById('editStart').value = item.start;
-                document.getElementById('editEnd').value = item.end;
-                document.getElementById('editTitle').value = item.title;
-                document.getElementById('editSub').value = item.sub || '';
-                document.getElementById('editBook').value = item.book || '';
-                document.getElementById('editTip').value = item.tip || '';
-                editingSelectedColor = item.color || 'default';
-                deleteArea.classList.remove('hidden');
-            } else {
-                document.getElementById('editModalHeading').textContent = '➕ 새 시간표 일정 추가';
-                document.getElementById('editDay').value = presetDay || selectedDayKey || 'mon';
-                document.getElementById('editCat').value = 'social';
-                document.getElementById('editStart').value = '20:00';
-                document.getElementById('editEnd').value = '21:30';
-                document.getElementById('editTitle').value = '';
-                document.getElementById('editSub').value = '';
-                document.getElementById('editBook').value = '';
-                document.getElementById('editTip').value = '';
-                editingSelectedColor = 'default';
-                deleteArea.classList.add('hidden');
-            }
-
-            renderColorPalettePicker();
-            document.getElementById('editModal').classList.remove('hidden');
-        }
-
-        function saveEditedSchedule(event) {
-            event.preventDefault();
-            const errBox = document.getElementById('editFormError');
-            const day = document.getElementById('editDay').value;
-            const cat = document.getElementById('editCat').value;
-            const start = document.getElementById('editStart').value;
-            const end = document.getElementById('editEnd').value;
-            const title = document.getElementById('editTitle').value.trim();
-            const sub = document.getElementById('editSub').value.trim();
-            const book = document.getElementById('editBook').value.trim();
-            const tip = document.getElementById('editTip').value.trim();
-            const color = editingSelectedColor || 'default';
-
-            if (!title) {
-                errBox.textContent = '⚠️ 일정 제목을 입력해 주세요.';
-                errBox.classList.remove('hidden');
-                return;
-            }
-            if (toMin(end) <= toMin(start)) {
-                errBox.textContent = '⚠️ 종료 시간은 시작 시간보다 늦어야 합니다.';
-                errBox.classList.remove('hidden');
-                return;
-            }
-
-            if (editingTaskId) {
-                const idx = scheduleList.findIndex(i => i.id === editingTaskId);
                 if (idx !== -1) {
-                    scheduleList[idx] = { ...scheduleList[idx], day, cat, color, start, end, title, sub, book, tip };
+                    todoList[idx] = {
+                        ...todoList[idx],
+                        type: todoFormType,
+                        subject,
+                        title,
+                        startDate: todoFormType === 'period' ? startDate : '',
+                        endDate: todoFormType === 'period' ? endDate : '',
+                        targetDate: todoFormType === 'single' ? targetDate : '',
+                        subtasks,
+                        memo
+                    };
                 }
-                showToast('💾 일정과 색상이 수정되었습니다!');
+                showToast('💾 항목이 수정되었습니다!');
             } else {
-                const newId = 'custom-' + Date.now();
-                scheduleList.push({ id: newId, day, cat, color, start, end, title, sub, book, tip });
-                selectedDayKey = day;
-                showToast('➕ 새 일정이 추가되었습니다!');
+                todoList.unshift({
+                    id: 'todo-' + Date.now(),
+                    type: todoFormType,
+                    subject,
+                    title,
+                    startDate: todoFormType === 'period' ? startDate : '',
+                    endDate: todoFormType === 'period' ? endDate : '',
+                    targetDate: todoFormType === 'single' ? targetDate : '',
+                    subtasks,
+                    memo,
+                    completed: false
+                });
+                showToast('✅ 새 항목이 추가되었습니다!');
             }
 
-            saveStorage(STORAGE_KEYS.SCHEDULE, scheduleList);
-            closeModal('editModal');
-            refreshAllViews();
-        }
-
-        function armDeleteBlock() {
-            document.getElementById('deleteStep1Btn').classList.add('hidden');
-            document.getElementById('deleteConfirmRow').classList.remove('hidden');
-        }
-
-        function disarmDeleteBlock() {
-            const s1 = document.getElementById('deleteStep1Btn');
-            const row = document.getElementById('deleteConfirmRow');
-            if (s1) s1.classList.remove('hidden');
-            if (row) row.classList.add('hidden');
-        }
-
-        function confirmDeleteBlock() {
-            if (!editingTaskId) return;
-            scheduleList = scheduleList.filter(i => i.id !== editingTaskId);
-            delete completedBlocks[editingTaskId];
-            saveStorage(STORAGE_KEYS.SCHEDULE, scheduleList);
-            saveStorage(STORAGE_KEYS.COMPLETED, completedBlocks);
-
-            closeModal('editModal');
-            refreshAllViews();
-            showToast('🗑️ 일정이 삭제되었습니다');
-        }
-
-        /* ---------------------------------------------------------
-           11. 교재 6권 보드 & 시험 기간 로드맵 렌더링
-        --------------------------------------------------------- */
-        function renderBooksBoard() {
-            const grid = document.getElementById('booksGrid');
-            const totalBadge = document.getElementById('booksTotalStatus');
-            if (!grid) return;
-
-            let totalSteps = 0;
-            let doneSteps = 0;
-
-            grid.innerHTML = TEXTBOOKS_DATA.map(book => {
-                const stepsHtml = book.steps.map((stepText, idx) => {
-                    const stepKey = `${book.id}-step-${idx}`;
-                    const checked = !!bookProgress[stepKey];
-                    totalSteps++;
-                    if (checked) doneSteps++;
-
-                    return `
-                        <button type="button" onclick="toggleBookStep('${stepKey}')"
-                            class="w-full flex items-center gap-2.5 p-2 rounded-xl text-left text-xs font-bold border transition-colors ${checked ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">
-                            <span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 ${checked ? 'bg-white text-slate-900' : 'border border-slate-400 text-transparent'}">✓</span>
-                            <span class="${checked ? 'line-through opacity-80' : ''}">${escapeHtml(stepText)}</span>
-                        </button>
-                    `;
-                }).join('');
-
-                return `
-                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-white space-y-2.5">
-                        <div class="flex items-start justify-between gap-2">
-                            <div>
-                                <div class="text-[11px] font-bold text-slate-500">${escapeHtml(book.subject)}</div>
-                                <h3 class="text-sm font-extrabold text-slate-900 mt-0.5">${escapeHtml(book.title)}</h3>
-                            </div>
-                            <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-slate-100 text-slate-800 border border-slate-200 shrink-0">
-                                ${escapeHtml(book.priority)}
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(book.strategy)}</p>
-                        <div class="space-y-1.5 pt-1">${stepsHtml}</div>
-                    </div>
-                `;
-            }).join('');
-
-            if (totalBadge) totalBadge.textContent = `${doneSteps} / ${totalSteps} 단계 완료`;
-        }
-
-        function toggleBookStep(stepKey) {
-            if (bookProgress[stepKey]) delete bookProgress[stepKey];
-            else bookProgress[stepKey] = true;
-            saveStorage(STORAGE_KEYS.BOOKS, bookProgress);
-            renderBooksBoard();
-        }
-
-        function renderExamRoadmap() {
-            const list = document.getElementById('examRoadmapList');
-            if (!list) return;
-            list.innerHTML = EXAM_ROADMAP.map(row => `
-                <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-1">
-                    <div class="flex flex-wrap items-center justify-between gap-1.5">
-                        <span class="text-xs font-extrabold text-slate-900">${escapeHtml(row.date)} · ${escapeHtml(row.exam)}</span>
-                        <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-slate-900 text-white">${escapeHtml(row.after)}</span>
-                    </div>
-                    <p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(row.detail)}</p>
-                </div>
-            `).join('');
-        }
-
-        /* ---------------------------------------------------------
-           12. 관리 모달 & 공통 모달 제어
-        --------------------------------------------------------- */
-        function openManageModal() {
-            document.getElementById('restoreDefaultStep1').classList.remove('hidden');
-            document.getElementById('restoreDefaultConfirm').classList.add('hidden');
-            const newPinInp = document.getElementById('newPinInput');
-            if (newPinInp) {
-                newPinInp.value = '';
-                newPinInp.type = 'password';
-            }
-            const hashBox = document.getElementById('pinHashShareBox');
-            const hashOut = document.getElementById('pinHashOutput');
-            const statusBadge = document.getElementById('pinStatusBadge');
-            const savedCustomHash = loadStorage(STORAGE_KEYS.PIN_HASH, null);
-            if (savedCustomHash) {
-                if (statusBadge) {
-                    statusBadge.textContent = '변경됨 ✓';
-                    statusBadge.className = 'mono-solid-black px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-600 text-white';
-                }
-                if (hashBox && hashOut) {
-                    hashOut.value = savedCustomHash;
-                    hashBox.classList.remove('hidden');
-                }
-            } else {
-                if (statusBadge) {
-                    statusBadge.textContent = '기본값(1209)';
-                    statusBadge.className = 'px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-slate-200 text-slate-700';
-                }
-                if (hashBox) hashBox.classList.add('hidden');
-            }
-            document.getElementById('manageModal').classList.remove('hidden');
-        }
-
-        function toggleInputVisibility(inputId, btn) {
-            const inp = document.getElementById(inputId);
-            if (!inp) return;
-            const isHidden = inp.type === 'password';
-            inp.type = isHidden ? 'text' : 'password';
-            if (btn) btn.textContent = isHidden ? '🙈' : '👁️';
-        }
-        function updateCustomPin(event) {
-            if (event) event.preventDefault();
-            const inp = document.getElementById('newPinInput');
-            const val = inp ? inp.value.trim() : '';
-            if (val.length < 4) {
-                showToast('⚠️ 비밀번호는 4자 이상 입력해 주세요');
-                return;
-            }
-            const newHash = computePinHash(val);
-            saveStorage(STORAGE_KEYS.PIN_HASH, newHash);
-            saveStorage(STORAGE_KEYS.UNLOCKED_HASH, newHash);
-
-            const statusBadge = document.getElementById('pinStatusBadge');
-            if (statusBadge) {
-                statusBadge.textContent = '변경됨 ✓';
-                statusBadge.className = 'mono-solid-black px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-600 text-white';
-            }
-
-            const hashBox = document.getElementById('pinHashShareBox');
-            const hashOut = document.getElementById('pinHashOutput');
-            if (hashBox && hashOut) {
-                hashOut.value = newHash;
-                hashBox.classList.remove('hidden');
-            }
-            if (inp) inp.value = '';
-            showToast('🔒 새 비밀번호가 적용되었습니다! (GitHub용 다운로드 가능)');
-        }
-
-        function downloadUpdatedHtmlWithPin() {
-            const activeHash = getActivePinHash();
-            const clone = document.documentElement.cloneNode(true);
-
-            const cloneBody = clone.querySelector('body');
-            if (cloneBody) {
-                cloneBody.classList.add('locked-state');
-                cloneBody.classList.remove('capture-mode');
-            }
-
-            const overlay = clone.querySelector('#pinLockOverlay');
-            if (overlay) overlay.classList.remove('hidden');
-
-            ['detailModal', 'editModal', 'todoModal', 'manageModal', 'toastBox'].forEach(id => {
-                const el = clone.querySelector('#' + id);
-                if (el) el.classList.add('hidden');
-            });
-
-            ['filterBar', 'daySelectorBar', 'singleDayWrapper', 'weekDayHeaders', 'weekTimeGrid',
-             'todoSummaryRow', 'todoFilterBar', 'todoListContainer', 'booksGrid', 'examRoadmapList', 'todayChecklistPanel'].forEach(id => {
-                const el = clone.querySelector('#' + id);
-                if (el) el.innerHTML = '';
-            });
-
-            const scripts = clone.querySelectorAll('script');
-            scripts.forEach(sc => {
-                if (sc.textContent && sc.textContent.includes('DEFAULT_PIN_HASH')) {
-                    sc.textContent = sc.textContent.replace(
-                        /const DEFAULT_PIN_HASH\s*=\s*[^;]+;/,
-                        `const DEFAULT_PIN_HASH = '${activeHash}';`
-                    );
-                }
-            });
-
-            const fullHtml = '<!DOCTYPE html>\n' + clone.outerHTML;
-            const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'index.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('📥 새 비밀번호가 반영된 index.html을 다운로드했습니다!');
-        }
-
-        /* ---------------------------------------------------------
-           12-1. PIN 잠금 화면 및 비밀번호 변경 로직
-        --------------------------------------------------------- */
-        function getActivePinHash() {
-            return loadStorage(STORAGE_KEYS.PIN_HASH, null) || DEFAULT_PIN_HASH;
-        }
-
-        function initPinLockState() {
-            const activeHash = getActivePinHash();
-            const unlockedHash = loadStorage(STORAGE_KEYS.UNLOCKED_HASH, null);
-            if (unlockedHash && unlockedHash === activeHash) {
-                unlockScreenUI();
-            } else {
-                lockScreenUI();
-            }
-        }
-
-        function unlockScreenUI() {
-            document.body.classList.remove('locked-state');
-            const overlay = document.getElementById('pinLockOverlay');
-            if (overlay) overlay.classList.add('hidden');
-        }
-
-        function lockScreenUI() {
-            document.body.classList.add('locked-state');
-            const overlay = document.getElementById('pinLockOverlay');
-            const inp = document.getElementById('pinInputField');
-            const err = document.getElementById('pinErrorMsg');
-            if (overlay) overlay.classList.remove('hidden');
-            if (err) err.classList.add('hidden');
-            if (inp) {
-                inp.value = '';
-                setTimeout(() => inp.focus(), 60);
-            }
-        }
-
-        function submitPinUnlock(event) {
-            event.preventDefault();
-            const inp = document.getElementById('pinInputField');
-            const err = document.getElementById('pinErrorMsg');
-            const remember = document.getElementById('rememberDeviceCheck');
-            const entered = inp ? inp.value.trim() : '';
-            const activeHash = getActivePinHash();
-
-            if (computePinHash(entered) === activeHash) {
-                if (remember && remember.checked) {
-                    saveStorage(STORAGE_KEYS.UNLOCKED_HASH, activeHash);
-                } else {
-                    try { localStorage.removeItem(STORAGE_KEYS.UNLOCKED_HASH); } catch (e) {}
-                }
-                unlockScreenUI();
-                showToast('🔓 잠금이 해제되었습니다');
-            } else {
-                if (err) err.classList.remove('hidden');
-                if (inp) {
-                    inp.value = '';
-                    inp.focus();
-                }
-            }
-        }
-
-        function lockPlannerNow() {
-            try { localStorage.removeItem(STORAGE_KEYS.UNLOCKED_HASH); } catch (e) {}
-            lockScreenUI();
-        }
-
-        function copyPinHashToClipboard() {
-            const hashOut = document.getElementById('pinHashOutput');
-            if (!hashOut) return;
-            hashOut.select();
-            hashOut.setSelectionRange(0, 99999);
-            try {
-                document.execCommand('copy');
-                showToast('📋 암호화 키가 복사되었습니다');
-            } catch (e) {
-                showToast('복사에 실패했습니다. 직접 선택해 복사해 주세요');
-            }
-        }
-
-        function resetChecksOnly() {
-            completedBlocks = {};
-            saveStorage(STORAGE_KEYS.COMPLETED, completedBlocks);
-            closeModal('manageModal');
-            refreshAllViews();
-            showToast('↺ 주간 완료 체크가 모두 초기화되었습니다');
-        }
-
-        function armRestoreDefault() {
-            document.getElementById('restoreDefaultStep1').classList.add('hidden');
-            document.getElementById('restoreDefaultConfirm').classList.remove('hidden');
-        }
-
-        function confirmRestoreDefault() {
-            scheduleList = JSON.parse(JSON.stringify(DEFAULT_SCHEDULE));
-            completedBlocks = {};
-            saveStorage(STORAGE_KEYS.SCHEDULE, scheduleList);
-            saveStorage(STORAGE_KEYS.COMPLETED, completedBlocks);
-            closeModal('manageModal');
-            refreshAllViews();
-            showToast('✨ 처음 추천 시간표로 복원되었습니다');
-        }
-
-        function closeModal(modalId) {
-            const el = document.getElementById(modalId);
-            if (el) el.classList.add('hidden');
-            if (modalId === 'detailModal') currentModalTaskId = null;
-            if (modalId === 'editModal') editingTaskId = null;
-            if (modalId === 'todoModal') editingTodoId = null;
-        }
-
-        function closeModalOnBackdrop(event, modalId) {
-            if (event.target && event.target.id === modalId) closeModal(modalId);
-        }
-
-        /* ---------------------------------------------------------
-           13. 초기화 실행
-        --------------------------------------------------------- */
-        window.addEventListener('DOMContentLoaded', () => {
-            const { dayKey } = getNowInfo();
-            selectedDayKey = dayKey;
-
-            applyMonoMode();
-            initPinLockState();
-            updateDDay();
-            renderBooksBoard();
-            renderExamRoadmap();
+            saveStorage(STORAGE_KEYS.TODOS, todoList);
+            closeModal('todoModal');
             renderTodoSection();
-
-            // 모바일 화면에서는 요일별 보기를 기본값으로 자동 설정
-            const initialLayout = currentLayout || (window.innerWidth < 768 ? 'day' : 'week');
-            setGridLayout(initialLayout, false);
-
-            renderFilterBar();
             renderNowDashboard();
-            updateStickyOffsets();
+        }
 
-            window.addEventListener('resize', updateStickyOffsets);
+        /* ---------------------------------------------------------
+           10. 상세 모달 & 일정 추가/수정/삭제 로직
+        --------------------------------------------------------- */
+        function openDetailModal(id) {
+            const item = scheduleList.find(i => i.id === id);
+            if (!item) return;
+            currentModalTaskId = id;
 
-            // 30초마다 실시간 NOW 상태 갱신
-            setInterval(() => {
-                renderNowDashboard();
-                if (currentLayout === 'day') renderSingleDayView();
-                else renderWeekGrid();
-            }, 30000);
-        });
-    </script>
-</body>
-</html>
+            const dayObj = DAYS.find(d => d.key === item.day);
+            document.getElementById('modalCategoryPill').textContent = getCategoryLabel(item.cat);
+            document.getElementById('modalTimeText').textContent = `${dayObj ? dayObj.full : ''} ${item.start} ~ ${item.end}`;
+            document.getElementById('modalTitle').textContent = item.title + (item.sub ? ` (${item.sub})` : '');
+            document.getElementById('modalBook').textContent = item.book || '별도 교재 없음';
+            document.getElementById('modalTip').textContent = item.tip || '등록된 세부 메모가 없습니다.';
+
+            updateDetailModalCheckBtn(id);
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function updateDetailModalCheckBtn(id) {
+            const btn = document.getElementById('modalToggleCompleteBtn');
+            if (!btn) return;
+            const isDone = !!completedBlocks[id];
+            if (isDone) {
+                btn.textContent = '✓ 완료됨 (클릭 시 취소)';
+                btn.className = 'flex-1 py-3 rounded-xl font-extrabold text-sm bg-emerald-600 text-white hover:bg-emerald-700 transition-colors mono-gray';
+            } else {
+                btn.textContent = '☐ 완료 체크하기';
+                btn.className = 'flex-1 py-3 rounded-xl font-extrabold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors';
+            }
+        }
+
+        function toggleModalTaskComplete() {
+            if (!currentModalTaskId) return;
+            toggleBlockComplete(currentModalTaskId);
+        }
+
+        function openEditFromDetail() {
+            const targetId = currentModalTaskId;
+            closeModal('detailModal');
+            if (targetId) openScheduleModal(targetId);
+        }
+
+        function renderColorPalettePicker() {
+// ... existing code ... -->
