@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="기말플래너">
     <title>운양고 1학년 기말 스케줄표 · 투두리스트</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,6 +50,20 @@
         body.locked-state header,
         body.locked-state main {
             display: none !important;
+        }
+
+        /* 아이폰 위젯 전용 모드(?widget=1)일 때 일반 UI 숨김 */
+        body.widget-mode #pinLockOverlay,
+        body.widget-mode header,
+        body.widget-mode main {
+            display: none !important;
+        }
+        body.widget-mode {
+            background-color: #0f172a !important;
+            padding-bottom: 0 !important;
+        }
+        body.widget-mode #iosWidgetRoot {
+            display: flex !important;
         }
 
         /* =========================================================
@@ -234,7 +251,16 @@
     </div>
 
     <!-- =========================================================
-         상단 고정 헤더 (D-Day, 빠른 추가, 흑백 모드, 캡처 모드, 잠금)
+         아이폰 홈 화면 위젯 전용 미니 뷰 (?widget=1 접속 시 자동 표시)
+    ========================================================= -->
+    <div id="iosWidgetRoot" class="hidden min-h-screen w-full bg-slate-950 text-white p-3.5 flex-col justify-between">
+        <div id="iosWidgetLiveCard" class="w-full max-w-md mx-auto my-auto rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 border border-white/15 p-4 shadow-xl space-y-3">
+            <!-- JS renderIosWidgetCard()로 동적 렌더링 -->
+        </div>
+    </div>
+
+    <!-- =========================================================
+         상단 고정 헤더 (D-Day, 빠른 추가, 흑백 모드, 위젯, 캡처 모드, 잠금)
     ========================================================= -->
     <header id="mainStickyHeader" class="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-xs">
         <div class="max-w-6xl mx-auto px-2.5 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between gap-1.5 sm:gap-2">
@@ -269,6 +295,11 @@
                     aria-label="흑백 모드 전환">
                     <span id="monoIcon">◑</span>
                     <span id="monoLabel">흑백</span>
+                </button>
+                <button type="button" onclick="openWidgetModal()"
+                    class="px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors"
+                    title="아이폰 홈 화면 위젯 설정">
+                    📱
                 </button>
                 <button type="button" onclick="toggleCaptureMode()"
                     class="px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors"
@@ -376,120 +407,32 @@
         </section>
 
         <!-- =========================================================
-             TAB 1: 주간 시간표 섹션
-        ========================================================= -->
-        <section id="section-timetable" class="space-y-3">
-
-            <!-- 컨트롤 패널: 보기 모드 전환 + 관리 + 과목별 하이라이트 -->
-            <div class="surface-card bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs space-y-3">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 hide-on-capture">
-                    <div class="flex items-center justify-between sm:justify-start gap-2">
-                        <span class="text-xs font-extrabold text-slate-800">👀 보기 방식</span>
-                        <button type="button" onclick="openManageModal()"
-                            class="sm:hidden text-[11px] font-bold text-slate-500 hover:text-slate-900 underline">
-                            ⚙️ 초기화·복원
-                        </button>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="grid grid-cols-2 flex-1 sm:flex bg-slate-100 p-1 rounded-xl gap-1 text-xs font-extrabold">
-                            <button type="button" id="layoutBtn-day" onclick="setGridLayout('day')"
-                                class="px-3 py-2 sm:py-1.5 rounded-lg bg-white text-indigo-700 shadow-xs transition-colors">
-                                📱 요일별 (스크롤 X)
-                            </button>
-                            <button type="button" id="layoutBtn-week" onclick="setGridLayout('week')"
-                                class="px-3 py-2 sm:py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition-colors">
-                                📊 전체 7일 (가로 스크롤)
-                            </button>
-                        </div>
-                        <button type="button" onclick="openManageModal()"
-                            class="hidden sm:inline-flex px-2.5 py-1.5 rounded-lg border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-slate-100">
-                            ⚙️ 관리
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 과목별 집중 하이라이트 필터 -->
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-extrabold text-slate-800">🔍 과목별 집중 보기</span>
-                        <span class="text-[11px] text-slate-400">블록 터치 시 상세 확인 및 수정</span>
-                    </div>
-                    <div id="filterBar" class="flex flex-wrap gap-1.5"></div>
-                </div>
-            </div>
-
-            <!-- [모드 A] 요일별 집중 보기: 상단 고정 월~일 요일 선택 바 (헤더 높이에 맞춰 자동 위치 보정) -->
-            <div id="daySelectorBar" style="top: 96px;" class="hidden sticky z-20 surface-card bg-white/95 backdrop-blur-xs rounded-2xl p-1.5 border border-slate-200 shadow-sm flex justify-between gap-1"></div>
-
-            <!-- [모드 A] 요일별 집중 보기 카드 영역 (좌우 스와이프 지원) -->
-            <div id="singleDayWrapper" class="hidden"></div>
-
-            <!-- [모드 B] 전체 7일 가로 스크롤 에브리타임 그리드 -->
-            <div id="weekGridWrapper" class="surface-card bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div class="px-3.5 py-2.5 border-b border-slate-100 flex items-center justify-between text-[11px] text-slate-500 bg-slate-50/70">
-                    <span class="font-bold text-slate-700">📌 7일 전체 시간표 (블록 클릭 시 수정 가능)</span>
-                    <span class="sm:hidden font-semibold">← 좌우로 스크롤하세요 →</span>
-                </div>
-                <div class="overflow-x-auto thin-scroll">
-                    <div class="min-w-[780px] p-2.5 sm:p-3.5">
-                        <div id="weekDayHeaders" class="grid grid-cols-[48px_repeat(7,1fr)] gap-1.5 mb-2"></div>
-                        <div id="weekTimeGrid" class="grid grid-cols-[48px_repeat(7,1fr)] gap-1.5 relative"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 캡처 모드 종료 버튼 -->
-            <div id="captureExitBanner" class="hidden text-center pt-2">
-                <button type="button" onclick="toggleCaptureMode()"
-                    class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-extrabold shadow-md">
-                    캡처 모드 종료하기
-                </button>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             TAB 2: 투두리스트 & 기간제 수행평가 관리 섹션
-        ========================================================= -->
-        <section id="section-todos" class="hidden space-y-3">
-            <!-- 상단 요약 및 추가 카드 -->
-            <div class="surface-card bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <div>
-                        <h2 class="text-base font-extrabold text-slate-900">✅ 투두리스트 & 수행평가(기간제)</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">일일 할 일부터 시작일~마감일이 있는 수행평가·프로젝트까지 한 번에 관리하세요.</p>
-                    </div>
-                    <button type="button" onclick="openTodoModal(null)"
-                        class="mono-solid-black px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shrink-0 transition-colors">
-                        ＋ 새 투두 / 수행평가 추가
-                    </button>
-                </div>
-
-                <!-- 상태 요약 3칸 지표 -->
-                <div id="todoSummaryRow" class="grid grid-cols-3 gap-2 pt-1"></div>
-
-                <!-- 투두 필터 바 -->
-                <div id="todoFilterBar" class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-100"></div>
-            </div>
-
-            <!-- 투두 카드 목록 -->
-            <div id="todoListContainer" class="space-y-2.5"></div>
-        </section>
-
-        <!-- =========================================================
-             TAB 3: 탐구·한국사 6권 교재 진도 트래커
+             TAB 3: 탐구·한국사 교재별 상세 진도 트래커
         ========================================================= -->
         <section id="section-books" class="hidden space-y-3">
-            <div class="surface-card bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div class="surface-card bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
-                        <h2 class="text-base font-extrabold text-slate-900">📚 탐구·한국사 6권 교재 운영 보드</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">시험 순서(통합사회 → 통합과학 → 한국사)에 맞춘 회독 체크리스트입니다.</p>
+                        <h2 class="text-base font-extrabold text-slate-900">📚 교재별 진도 · 페이지 트래커</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">현재 어디까지 풀었는지(단원·페이지)와 회독 단계를 한눈에 확인하세요.</p>
                     </div>
-                    <span id="booksTotalStatus" class="px-2.5 py-1 rounded-lg bg-slate-100 text-xs font-extrabold text-slate-700 self-start sm:self-center">
-                        0 / 18 단계 완료
-                    </span>
+                    <div class="flex items-center gap-2 self-start sm:self-center">
+                        <span id="booksTotalStatus" class="px-2.5 py-1.5 rounded-xl bg-slate-100 text-xs font-extrabold text-slate-800">
+                            전체 평균 0%
+                        </span>
+                        <button type="button" onclick="openBookModal(null)"
+                            class="mono-solid-black px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold whitespace-nowrap transition-colors">
+                            ＋ 교재 추가
+                        </button>
+                    </div>
                 </div>
-                <div id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+
+                <!-- 전체 교재 평균 진도 게이지 -->
+                <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div id="booksOverallBar" class="mono-solid-black h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                </div>
+
+                <div id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"></div>
             </div>
         </section>
 
@@ -665,16 +608,16 @@
                         <button type="button" id="deleteStep1Btn" onclick="armDeleteBlock()"
                             class="w-full py-2.5 rounded-xl font-bold text-xs text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 mono-gray">
                             🗑️ 이 일정 삭제하기
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div class="min-w-0">
-                            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">시작일</label>
-                            <input type="date" id="todoStartDate"
-                                class="w-full min-w-0 max-w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
-                        </div>
-                        <div class="min-w-0">
-                            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">마감일 (제출일)</label>
-                            <input type="date" id="todoEndDate"
-                                class="w-full min-w-0 max-w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
+                        </button>
+                        <div id="deleteStep2Area" class="hidden flex items-center gap-2">
+                            <button type="button" onclick="confirmDeleteBlock()"
+                                class="flex-1 py-2.5 rounded-xl font-extrabold text-xs bg-rose-600 text-white hover:bg-rose-700 mono-solid-black">
+                                정말 삭제할까요? (클릭)
+                            </button>
+                            <button type="button" onclick="cancelDeleteBlock()"
+                                class="px-3.5 py-2.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-700">
+                                취소
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -686,7 +629,7 @@
          모달 3: 투두리스트 & 기간제 수행평가 추가 / 수정 모달
     ========================================================= -->
     <div id="todoModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto" onclick="closeModalOnBackdrop(event, 'todoModal')">
-        <div class="surface-card bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-xl border border-slate-200 space-y-3.5 max-h-[92vh] overflow-y-auto">
+        <div class="surface-card bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 safe-pb shadow-xl border border-slate-200 space-y-3.5 max-h-[92dvh] overflow-y-auto">
             <div class="flex items-center justify-between">
                 <h3 id="todoModalHeading" class="text-base font-extrabold text-slate-900">✅ 새 투두 / 수행평가 추가</h3>
                 <button type="button" onclick="closeModal('todoModal')"
@@ -744,16 +687,16 @@
                             <button type="button" onclick="applyExamPreset()" class="px-2 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-bold hover:bg-slate-100">12/8까지</button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div class="min-w-0">
                             <label class="block text-[11px] font-bold text-slate-500 mb-0.5">시작일</label>
                             <input type="date" id="todoStartDate"
-                                class="w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
+                                class="w-full min-w-0 max-w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <label class="block text-[11px] font-bold text-slate-500 mb-0.5">마감일 (제출일)</label>
                             <input type="date" id="todoEndDate"
-                                class="w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
+                                class="w-full min-w-0 max-w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
                         </div>
                     </div>
                 </div>
@@ -768,7 +711,7 @@
                         </div>
                     </div>
                     <input type="date" id="todoTargetDate"
-                        class="w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
+                        class="w-full min-w-0 max-w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800">
                 </div>
 
                 <!-- 세부 단계 체크리스트 (수행평가 분할 진행용) -->
@@ -802,6 +745,165 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         모달 5: 교재별 상세 진도 기록 / 교재 추가 모달
+    ========================================================= -->
+    <div id="bookModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto" onclick="closeModalOnBackdrop(event, 'bookModal')">
+        <div class="surface-card bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 safe-pb shadow-xl border border-slate-200 space-y-3.5 max-h-[92dvh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 id="bookModalHeading" class="text-base font-extrabold text-slate-900">📖 교재 진도 기록하기</h3>
+                <button type="button" onclick="closeModal('bookModal')"
+                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center">
+                    ✕
+                </button>
+            </div>
+
+            <div id="bookFormError" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 mono-gray"></div>
+
+            <form id="bookEditForm" onsubmit="saveBookProgress(event)" class="space-y-3 text-xs">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div class="min-w-0">
+                        <label class="block font-extrabold text-slate-700 mb-1">과목 / 시험일</label>
+                        <input type="text" id="bookSubjectInput" placeholder="예: 통합사회2 (12/9)" required maxlength="30"
+                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                    </div>
+                    <div class="min-w-0">
+                        <label class="block font-extrabold text-slate-700 mb-1">우선순위 배지</label>
+                        <input type="text" id="bookPriorityInput" placeholder="예: 최우선 완료, 핵심 주력" maxlength="20"
+                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">교재명 *</label>
+                    <input type="text" id="bookTitleInput" placeholder="예: 자이스토리 사회" required maxlength="35"
+                        class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                </div>
+
+                <!-- 현재 페이지 / 목표 전체 페이지 -->
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="font-extrabold text-slate-800">📊 페이지 / 문항 진도 수치</span>
+                        <span id="bookModalPctPreview" class="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 font-extrabold text-[11px] mono-gray">0%</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div class="min-w-0">
+                            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">현재까지 완료 (페이지/강)</label>
+                            <input type="number" id="bookCurrentPageInput" min="0" max="9999" oninput="updateBookModalPctPreview()"
+                                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-extrabold text-slate-900">
+                        </div>
+                        <div class="min-w-0">
+                            <label class="block text-[11px] font-bold text-slate-500 mb-0.5">시험범위 총량 (페이지/강)</label>
+                            <input type="number" id="bookTotalPageInput" min="1" max="9999" oninput="updateBookModalPctPreview()"
+                                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-extrabold text-slate-900">
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 pt-0.5">
+                        <button type="button" onclick="adjustBookModalPage(5)" class="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-[11px] font-extrabold hover:bg-slate-100">+5p 추가</button>
+                        <button type="button" onclick="adjustBookModalPage(10)" class="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-[11px] font-extrabold hover:bg-slate-100">+10p 추가</button>
+                        <button type="button" onclick="setBookModalComplete()" class="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-extrabold hover:bg-emerald-100 mono-gray">100% 완북</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">📍 마지막으로 푼 위치 (단원 · 쪽수 · 번호 메모)</label>
+                    <input type="text" id="bookLocationInput" placeholder="예: 2단원 시장경제와 금융 (p.54 18번까지 완료)" maxlength="60"
+                        class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:border-slate-900">
+                </div>
+
+                <div>
+                    <label class="block font-extrabold text-slate-700 mb-1">활용 전략 메모</label>
+                    <textarea id="bookStrategyInput" rows="2" placeholder="교재 활용 방법이나 오답 주의사항을 적어주세요."
+                        class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white font-medium text-slate-800 focus:outline-none focus:border-slate-900"></textarea>
+                </div>
+
+                <div class="pt-1 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <button type="submit"
+                            class="flex-1 py-3 rounded-xl font-extrabold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors">
+                            💾 진도 저장하기
+                        </button>
+                        <button type="button" onclick="closeModal('bookModal')"
+                            class="px-4 py-3 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+                            취소
+                        </button>
+                    </div>
+                    <div id="deleteBookArea" class="hidden pt-1 border-t border-slate-100">
+                        <button type="button" id="deleteBookStep1" onclick="armDeleteBook()"
+                            class="w-full py-2 rounded-xl font-bold text-xs text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 mono-gray">
+                            🗑️ 이 교재 삭제하기
+                        </button>
+                        <button type="button" id="deleteBookConfirm" onclick="confirmDeleteBook()"
+                            class="hidden w-full py-2 rounded-xl font-extrabold text-xs bg-rose-600 text-white hover:bg-rose-700 mono-solid-black">
+                            정말 삭제할까요? (클릭)
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         모달 6: 아이폰 홈 화면 위젯 설정 & 실시간 미리보기 모달
+    ========================================================= -->
+    <div id="widgetModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto" onclick="closeModalOnBackdrop(event, 'widgetModal')">
+        <div class="surface-card bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 safe-pb shadow-xl border border-slate-200 space-y-4 max-h-[92dvh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-slate-900">📱 아이폰 홈 화면 위젯 만들기</h3>
+                <button type="button" onclick="closeModal('widgetModal')"
+                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center">
+                    ✕
+                </button>
+            </div>
+
+            <!-- 실제 아이폰 위젯에 뜰 화면 실시간 미리보기 -->
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-[11px] font-extrabold text-slate-600">
+                    <span>👀 홈 화면 위젯 미리보기 (실시간 연동)</span>
+                    <span class="text-indigo-600 mono-gray">중형(Medium) 크기</span>
+                </div>
+                <div id="widgetModalPreviewCard" class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white p-4 shadow-md border border-slate-800 space-y-2.5">
+                    <!-- JS로 렌더링 -->
+                </div>
+            </div>
+
+            <!-- 위젯 전용 URL 복사 -->
+            <div class="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200 space-y-2 mono-gray">
+                <div class="text-xs font-extrabold text-indigo-950">1단계: 위젯 전용 주소(?widget=1) 복사</div>
+                <p class="text-[11px] text-indigo-800 leading-relaxed">
+                    위젯 전용 주소는 잠금 화면 없이 <strong>현재 할 일·D-Day·교재 진도 카드</strong>만 깔끔하게 띄워줍니다.
+                </p>
+                <div class="flex items-center gap-1.5">
+                    <input type="text" id="widgetUrlOutput" readonly
+                        class="flex-1 px-2.5 py-2 rounded-lg border border-indigo-200 bg-white text-[11px] font-mono text-slate-700">
+                    <button type="button" onclick="copyWidgetUrl()"
+                        class="mono-solid-black px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shrink-0">
+                        주소 복사
+                    </button>
+                </div>
+            </div>
+
+            <!-- 아이폰 적용 3가지 방법 안내 -->
+            <div class="space-y-2 text-xs text-slate-700">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                    <div class="font-extrabold text-slate-900">⭐ 방법 A. 홈 화면에 실시간 위젯 띄우기 (추천)</div>
+                    <ol class="list-decimal list-inside text-[11px] text-slate-600 space-y-1 leading-relaxed">
+                        <li>App Store에서 무료 앱 <strong>「Glimpse 2」</strong>를 설치합니다.</li>
+                        <li>앱에서 <strong>+ 버튼</strong>을 누르고 위에서 복사한 <strong><code>?widget=1</code> 주소</strong>를 붙여넣습니다.</li>
+                        <li>아이폰 홈 화면 빈 곳 길게 누르기 → 좌측 상단 <strong>+</strong> → <strong>Glimpse 2</strong> 위젯 추가!</li>
+                    </ol>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                    <div class="font-extrabold text-slate-900">⚡ 방법 B. 앱 설치 없이 기본 '단축어' 위젯</div>
+                    <p class="text-[11px] text-slate-600 leading-relaxed">
+                        아이폰 기본 <strong>단축어</strong> 앱 → <strong>+</strong> → <strong>URL 열기</strong>(내 GitHub 주소 입력) 후 홈 화면에 <strong>단축어 위젯</strong>을 두면 터치 한 번에 바로 열립니다.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -901,6 +1003,7 @@
             COMPLETED: 'unyango_v4_completed_blocks',
             TODOS: 'unyango_v4_todos_list',
             BOOKS: 'unyango_v4_books_progress',
+            BOOKS_DATA: 'unyango_v4_books_detail_list',
             MONO: 'unyango_v4_mono_mode',
             LAYOUT: 'unyango_v4_grid_layout',
             PIN_HASH: 'unyango_v4_pin_hash',
@@ -1017,14 +1120,14 @@
             { id: 'sun-6', day: 'sun', start: '21:30', end: '23:00', cat: 'science', title: '주간 오답 백지복습', sub: '사회·과학 핵심 총정리', book: '전 과목 오답 노트', tip: '일주일간 사회·과학에서 틀렸던 핵심 개념을 빈 종이에 써보며 다음 주를 준비합니다.' }
         ];
 
-        // 6권 교재 진도 트래커 데이터
+        // 6권 교재 진도 트래커 기본 데이터 (단원 위치 + 페이지 진행률 포함)
         const TEXTBOOKS_DATA = [
-            { id: 'book-1', subject: '통합사회2 (시험 1일차 · 12/9)', title: '자이스토리 사회', priority: '최우선 완료', strategy: '첫날 시험 과목이므로 12/5(토)까지 전 범위 1회독과 오답 정리를 끝내야 합니다.', steps: ['시험범위 1회독 풀이', '틀린 선지 개념 복습', '시험 직전 오답 재풀이'] },
-            { id: 'book-2', subject: '통합과학2 (시험 3일차 · 12/11)', title: '완자 과학', priority: '개념 베이스', strategy: '학교 수업 진도에 맞춰 개념과 기본 확인 문제 위주로 빈틈을 잡는 용도로 활용하세요.', steps: ['전 단원 개념 정리', '기본·내신 만점 문제', '취약 단원 개념 재독'] },
-            { id: 'book-3', subject: '통합과학2 (시험 3일차 · 12/11)', title: '완자 기출픽 과학', priority: '핵심 주력', strategy: '가장 실전적인 내신 기출 교재입니다. 전 문항 풀이 후 틀린 문제 2회독을 목표로 잡으세요.', steps: ['기출 전 문항 1회독', '오답 문항 재풀이', '서술형 빈출 암기'] },
-            { id: 'book-4', subject: '통합과학2 (시험 3일차 · 12/11)', title: '1등급마스터 과학', priority: '고난도 선별', strategy: '시간을 아끼기 위해 전 문항 대신 고난도·자료해석·서술형 변별력 문항만 발췌해 푸세요.', steps: ['고난도 문항 선별 풀이', '서술형 킬러 점검', '시험 전날 오답 확인'] },
-            { id: 'book-5', subject: '한국사2 (시험 마지막날 · 12/16)', title: '1등급마스터 한국사', priority: '흐름·기출 핵심', strategy: '평일 밤에 핵심 흐름과 대표 기출을 빠르게 훑어 기본 점수를 확보하는 용도입니다.', steps: ['시대별 핵심 흐름 정리', '대표 기출 문제 완료', '연표·사료 암기 점검'] },
-            { id: 'book-6', subject: '한국사2 (시험 마지막날 · 12/16)', title: '자이스토리 한국사', priority: '취약 보충·마무리', strategy: '주말 및 시험 기간 주말(12/12~13)과 전날(12/15)에 취약 단원 실전 감각용으로 활용하세요.', steps: ['취약 단원 집중 풀이', '사료 해석 오답 정리', '12/15 최종 모의 점검'] }
+            { id: 'book-1', subject: '통합사회2 (시험 1일차 · 12/9)', title: '자이스토리 사회', priority: '최우선 완료', currentPage: 0, totalPage: 120, lastLocation: '1단원 시작 전 (목표: 12/5까지 1회독)', strategy: '첫날 시험 과목이므로 12/5(토)까지 전 범위 1회독과 오답 정리를 끝내야 합니다.', steps: ['시험범위 1회독 풀이', '틀린 선지 개념 복습', '시험 직전 오답 재풀이'] },
+            { id: 'book-2', subject: '통합과학2 (시험 3일차 · 12/11)', title: '완자 과학', priority: '개념 베이스', currentPage: 0, totalPage: 110, lastLocation: '학교 진도 맞춰 개념 확인 시작', strategy: '학교 수업 진도에 맞춰 개념과 기본 확인 문제 위주로 빈틈을 잡는 용도로 활용하세요.', steps: ['전 단원 개념 정리', '기본·내신 만점 문제', '취약 단원 개념 재독'] },
+            { id: 'book-3', subject: '통합과학2 (시험 3일차 · 12/11)', title: '완자 기출픽 과학', priority: '핵심 주력', currentPage: 0, totalPage: 100, lastLocation: '기출 대표 유형 풀이 시작 전', strategy: '가장 실전적인 내신 기출 교재입니다. 전 문항 풀이 후 틀린 문제 2회독을 목표로 잡으세요.', steps: ['기출 전 문항 1회독', '오답 문항 재풀이', '서술형 빈출 암기'] },
+            { id: 'book-4', subject: '통합과학2 (시험 3일차 · 12/11)', title: '1등급마스터 과학', priority: '고난도 선별', currentPage: 0, totalPage: 80, lastLocation: '고난도·서술형 문항 선별 대기', strategy: '시간을 아끼기 위해 전 문항 대신 고난도·자료해석·서술형 변별력 문항만 발췌해 푸세요.', steps: ['고난도 문항 선별 풀이', '서술형 킬러 점검', '시험 전날 오답 확인'] },
+            { id: 'book-5', subject: '한국사2 (시험 마지막날 · 12/16)', title: '1등급마스터 한국사', priority: '흐름·기출 핵심', currentPage: 0, totalPage: 90, lastLocation: '근현대사 핵심 흐름 정리 시작', strategy: '평일 밤에 핵심 흐름과 대표 기출을 빠르게 훑어 기본 점수를 확보하는 용도입니다.', steps: ['시대별 핵심 흐름 정리', '대표 기출 문제 완료', '연표·사료 암기 점검'] },
+            { id: 'book-6', subject: '한국사2 (시험 마지막날 · 12/16)', title: '자이스토리 한국사', priority: '취약 보충·마무리', currentPage: 0, totalPage: 110, lastLocation: '주말 취약 단원 실전 문풀 대기', strategy: '주말 및 시험 기간 주말(12/12~13)과 전날(12/15)에 취약 단원 실전 감각용으로 활용하세요.', steps: ['취약 단원 집중 풀이', '사료 해석 오답 정리', '12/15 최종 모의 점검'] }
         ];
 
         // 시험 기간 오후 전략 (12/9 ~ 12/16)
@@ -1127,6 +1230,7 @@
         let completedBlocks = loadStorage(STORAGE_KEYS.COMPLETED, {});
         let todoList = loadStorage(STORAGE_KEYS.TODOS, null) || createInitialTodos();
         let bookProgress = loadStorage(STORAGE_KEYS.BOOKS, {});
+        let bookDataList = loadStorage(STORAGE_KEYS.BOOKS_DATA, null) || JSON.parse(JSON.stringify(TEXTBOOKS_DATA));
         let isMonoMode = loadStorage(STORAGE_KEYS.MONO, false);
         let currentLayout = loadStorage(STORAGE_KEYS.LAYOUT, null);
 
@@ -1136,6 +1240,7 @@
         let currentModalTaskId = null;
         let editingTaskId = null;
         let editingSelectedColor = 'default';
+        let editingBookId = null;
         let editingTodoId = null;
         let todoFormType = 'period';
         let currentNowTaskId = null;
@@ -1143,6 +1248,7 @@
         let isCaptureMode = false;
         let pendingDeleteTodoId = null;
         let toastTimer = null;
+        const isWidgetMode = new URLSearchParams(window.location.search).get('widget') === '1';
 
         /* ---------------------------------------------------------
            3. 공통 유틸리티 & 스티키 위치 보정
@@ -2321,4 +2427,791 @@
         }
 
         function renderColorPalettePicker() {
-// ... existing code ... -->
+            const grid = document.getElementById('colorPaletteGrid');
+            if (!grid) return;
+
+            const isCustomHex = String(editingSelectedColor || '').startsWith('#');
+            const customHexVal = isCustomHex ? editingSelectedColor : '#3b82f6';
+
+            const swatchesHtml = COLOR_SWATCHES.map(sw => {
+                const isSelected = editingSelectedColor === sw.key;
+                const ringStyle = isSelected ? 'ring-2 ring-offset-2 ring-slate-900 scale-105' : 'opacity-90 hover:opacity-100';
+                return `
+                    <button type="button" onclick="selectBlockColor('${sw.key}')" title="${sw.label}"
+                        style="background-color: ${sw.bg}; border-color: ${sw.border}; color: ${sw.text};"
+                        class="w-7 h-7 rounded-full border text-[10px] font-extrabold flex items-center justify-center transition-transform ${ringStyle}">
+                        ${sw.key === 'default' ? '자동' : (isSelected ? '✓' : '')}
+                    </button>
+                `;
+            }).join('');
+
+            grid.innerHTML = `
+                ${swatchesHtml}
+                <label title="자유 색상 직접 선택"
+                    class="px-2 h-7 rounded-full border border-slate-300 bg-white text-[10px] font-extrabold text-slate-700 flex items-center gap-1 cursor-pointer hover:bg-slate-100 ${isCustomHex ? 'ring-2 ring-offset-1 ring-slate-900' : ''}">
+                    <span>🎨</span>
+                    <span>직접</span>
+                    <input type="color" value="${customHexVal}" onchange="selectCustomHexColor(this.value)" class="w-0 h-0 opacity-0 absolute">
+                </label>
+            `;
+
+            updateColorPreviewBar();
+        }
+
+        function selectBlockColor(key) {
+            editingSelectedColor = key;
+            renderColorPalettePicker();
+        }
+
+        function selectCustomHexColor(hex) {
+            editingSelectedColor = hex;
+            renderColorPalettePicker();
+        }
+
+        function updateColorPreviewBar() {
+            const pill = document.getElementById('colorPreviewPill');
+            const nameEl = document.getElementById('selectedColorName');
+            const catEl = document.getElementById('editCat');
+            if (!pill || !nameEl) return;
+
+            const fakeItem = { cat: catEl ? catEl.value : 'social', color: editingSelectedColor };
+            const app = getBlockAppearance(fakeItem);
+
+            if (!editingSelectedColor || editingSelectedColor === 'default') {
+                nameEl.textContent = '과목 기본색 (자동)';
+                pill.className = `px-3 py-1.5 rounded-lg text-[11px] font-extrabold truncate ${app.className}`;
+                pill.removeAttribute('style');
+            } else {
+                const sw = COLOR_SWATCHES.find(s => s.key === editingSelectedColor);
+                nameEl.textContent = sw ? sw.label : `직접선택 (${editingSelectedColor.toUpperCase()})`;
+                pill.className = 'px-3 py-1.5 rounded-lg text-[11px] font-extrabold truncate border';
+                pill.setAttribute('style', app.inlineStyle);
+            }
+        }
+
+        function openScheduleModal(id = null, presetDay = null, event = null) {
+            if (event) event.stopPropagation();
+            editingTaskId = id;
+
+            const errBox = document.getElementById('editFormError');
+            const delArea = document.getElementById('deleteBlockArea');
+            const step1 = document.getElementById('deleteStep1Btn');
+            const step2 = document.getElementById('deleteStep2Area');
+
+            if (errBox) errBox.classList.add('hidden');
+            if (step1) step1.classList.remove('hidden');
+            if (step2) step2.classList.add('hidden');
+
+            if (id) {
+                const item = scheduleList.find(i => i.id === id);
+                if (!item) return;
+                document.getElementById('editModalHeading').textContent = '✏️ 시간표 일정 수정';
+                document.getElementById('editDay').value = item.day;
+                document.getElementById('editCat').value = item.cat;
+                document.getElementById('editStart').value = item.start;
+                document.getElementById('editEnd').value = item.end;
+                document.getElementById('editTitle').value = item.title;
+                document.getElementById('editSub').value = item.sub || '';
+                document.getElementById('editBook').value = item.book || '';
+                document.getElementById('editTip').value = item.tip || '';
+                editingSelectedColor = item.color || 'default';
+                if (delArea) delArea.classList.remove('hidden');
+            } else {
+                document.getElementById('editModalHeading').textContent = '➕ 새 시간표 일정 추가';
+                document.getElementById('editDay').value = presetDay || (currentLayout === 'day' ? selectedDayKey : 'mon');
+                document.getElementById('editCat').value = 'social';
+                document.getElementById('editStart').value = '17:00';
+                document.getElementById('editEnd').value = '18:00';
+                document.getElementById('editTitle').value = '';
+                document.getElementById('editSub').value = '';
+                document.getElementById('editBook').value = '';
+                document.getElementById('editTip').value = '';
+                editingSelectedColor = 'default';
+                if (delArea) delArea.classList.add('hidden');
+            }
+
+            renderColorPalettePicker();
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function saveEditedSchedule(event) {
+            event.preventDefault();
+            const errBox = document.getElementById('editFormError');
+            const day = document.getElementById('editDay').value;
+            const cat = document.getElementById('editCat').value;
+            const start = document.getElementById('editStart').value;
+            const end = document.getElementById('editEnd').value;
+            const title = document.getElementById('editTitle').value.trim();
+            const sub = document.getElementById('editSub').value.trim();
+            const book = document.getElementById('editBook').value.trim();
+            const tip = document.getElementById('editTip').value.trim();
+
+            if (!title) {
+                errBox.textContent = '⚠️ 일정 제목을 입력해 주세요.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+            if (!start || !end || toMin(end) <= toMin(start)) {
+                errBox.textContent = '⚠️ 종료 시간은 시작 시간보다 늦어야 합니다.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            const payload = {
+                day,
+                cat,
+                start,
+                end,
+                title,
+                sub,
+                book,
+                tip,
+                color: editingSelectedColor || 'default'
+            };
+
+            if (editingTaskId) {
+                const idx = scheduleList.findIndex(i => i.id === editingTaskId);
+                if (idx !== -1) scheduleList[idx] = { ...scheduleList[idx], ...payload };
+                showToast('💾 일정이 수정되었습니다!');
+            } else {
+                scheduleList.push({
+                    id: 'custom-' + Date.now(),
+                    ...payload
+                });
+                selectedDayKey = day;
+                showToast('➕ 새 일정이 추가되었습니다!');
+            }
+
+            saveStorage(STORAGE_KEYS.SCHEDULE, scheduleList);
+            closeModal('editModal');
+            refreshAllViews();
+        }
+
+        function armDeleteBlock() {
+            document.getElementById('deleteStep1Btn').classList.add('hidden');
+            document.getElementById('deleteStep2Area').classList.remove('hidden');
+        }
+
+        function cancelDeleteBlock() {
+            document.getElementById('deleteStep2Area').classList.add('hidden');
+            document.getElementById('deleteStep1Btn').classList.remove('hidden');
+        }
+
+        function confirmDeleteBlock() {
+            if (!editingTaskId) return;
+            scheduleList = scheduleList.filter(i => i.id !== editingTaskId);
+            delete completedBlocks[editingTaskId];
+            saveStorage(STORAGE_KEYS.SCHEDULE, scheduleList);
+            saveStorage(STORAGE_KEYS.COMPLETED, completedBlocks);
+            closeModal('editModal');
+            refreshAllViews();
+            showToast('🗑️ 일정이 삭제되었습니다');
+        }
+
+        /* ---------------------------------------------------------
+           11. 교재별 페이지·단원 진도 트래커 로직
+        --------------------------------------------------------- */
+        function getBookPercent(book) {
+            const total = Math.max(1, Number(book.totalPage) || 100);
+            const cur = Math.max(0, Math.min(total, Number(book.currentPage) || 0));
+            return Math.round((cur / total) * 100);
+        }
+
+        function renderBooksSection() {
+            const grid = document.getElementById('booksGrid');
+            const statusBadge = document.getElementById('booksTotalStatus');
+            const overallBar = document.getElementById('booksOverallBar');
+            if (!grid) return;
+
+            let sumPct = 0;
+            bookDataList.forEach(b => {
+                sumPct += getBookPercent(b);
+            });
+            const avgPct = bookDataList.length > 0 ? Math.round(sumPct / bookDataList.length) : 0;
+
+            if (statusBadge) statusBadge.textContent = `전체 평균 ${avgPct}% (${bookDataList.length}권)`;
+            if (overallBar) overallBar.style.width = `${avgPct}%`;
+
+            grid.innerHTML = bookDataList.map(book => {
+                const steps = Array.isArray(book.steps) ? book.steps : ['1회독 풀이', '오답 복습', '직전 재풀이'];
+                const cur = Number(book.currentPage) || 0;
+                const tot = Math.max(1, Number(book.totalPage) || 100);
+                const pct = getBookPercent(book);
+                const isDoneAll = pct >= 100;
+
+                const stepsHtml = steps.map((stepText, idx) => {
+                    const key = `${book.id}-${idx}`;
+                    const checked = !!bookProgress[key];
+                    return `
+                        <button type="button" onclick="toggleBookStep('${book.id}', ${idx})"
+                            class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-left text-xs font-bold transition-colors ${checked ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">
+                            <span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 ${checked ? 'bg-emerald-500 text-white mono-gray' : 'border border-slate-400 text-transparent'}">✓</span>
+                            <span class="${checked ? 'line-through opacity-80' : ''} truncate">${escapeHtml(stepText)}</span>
+                        </button>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="surface-card rounded-2xl p-3.5 border ${isDoneAll ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200 bg-white'} space-y-2.5 flex flex-col justify-between">
+                        <div class="space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="min-w-0">
+                                    <div class="text-[11px] font-bold text-slate-500 truncate">${escapeHtml(book.subject)}</div>
+                                    <h3 class="text-sm font-extrabold text-slate-900 mt-0.5 truncate">${escapeHtml(book.title)}</h3>
+                                </div>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${isDoneAll ? 'bg-emerald-600 text-white mono-solid-black' : 'bg-slate-100 text-slate-800 border border-slate-200'}">
+                                        ${escapeHtml(book.priority || '진도 관리')}
+                                    </span>
+                                    <button type="button" onclick="openBookModal('${book.id}')"
+                                        class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-extrabold text-slate-700">
+                                        ✏️ 기록
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 현재 진도 위치 배지 -->
+                            <div onclick="openBookModal('${book.id}')" class="cursor-pointer px-2.5 py-2 rounded-xl bg-indigo-50/70 border border-indigo-200/80 flex items-center justify-between gap-2 mono-gray">
+                                <span class="text-[11px] font-extrabold text-indigo-950 truncate">
+                                    📍 ${escapeHtml(book.lastLocation || '진도 위치를 기록해 보세요')}
+                                </span>
+                                <span class="text-[10px] font-bold text-indigo-700 shrink-0">변경 ›</span>
+                            </div>
+
+                            <!-- 페이지 진행률 게이지 & 빠른 +5p/+10p 버튼 -->
+                            <div class="space-y-1.5 pt-0.5">
+                                <div class="flex items-center justify-between text-[11px] font-extrabold">
+                                    <span class="text-slate-700">${cur} / ${tot}p <span class="text-indigo-600 mono-gray">(${pct}%)</span></span>
+                                    <div class="flex items-center gap-1">
+                                        <button type="button" onclick="quickAddBookPages('${book.id}', 5)"
+                                            class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-extrabold">
+                                            +5p
+                                        </button>
+                                        <button type="button" onclick="quickAddBookPages('${book.id}', 10)"
+                                            class="px-2 py-0.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-extrabold">
+                                            +10p
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                                    <div class="mono-solid-black h-full ${isDoneAll ? 'bg-emerald-500' : 'bg-indigo-600'} rounded-full transition-all duration-300" style="width: ${pct}%;"></div>
+                                </div>
+                            </div>
+
+                            <p class="text-[11px] text-slate-600 leading-relaxed">${escapeHtml(book.strategy || '')}</p>
+                        </div>
+
+                        <div class="space-y-1.5 pt-1 border-t border-slate-100">${stepsHtml}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function quickAddBookPages(bookId, delta) {
+            const book = bookDataList.find(b => b.id === bookId);
+            if (!book) return;
+            const tot = Math.max(1, Number(book.totalPage) || 100);
+            const nextVal = Math.max(0, Math.min(tot, (Number(book.currentPage) || 0) + delta));
+            book.currentPage = nextVal;
+            saveStorage(STORAGE_KEYS.BOOKS_DATA, bookDataList);
+            renderBooksSection();
+            showToast(`📖 ${book.title}: ${nextVal}/${tot}p (${getBookPercent(book)}%)`);
+        }
+
+        function toggleBookStep(bookId, stepIdx) {
+            const key = `${bookId}-${stepIdx}`;
+            if (bookProgress[key]) delete bookProgress[key];
+            else bookProgress[key] = true;
+            saveStorage(STORAGE_KEYS.BOOKS, bookProgress);
+            renderBooksSection();
+            showToast(bookProgress[key] ? '📚 교재 단계 완료!' : '체크 해제됨');
+        }
+
+        function openBookModal(bookId = null) {
+            editingBookId = bookId;
+            const errBox = document.getElementById('bookFormError');
+            const delArea = document.getElementById('deleteBookArea');
+            const delStep1 = document.getElementById('deleteBookStep1');
+            const delConfirm = document.getElementById('deleteBookConfirm');
+
+            if (errBox) errBox.classList.add('hidden');
+            if (delStep1) delStep1.classList.remove('hidden');
+            if (delConfirm) delConfirm.classList.add('hidden');
+
+            if (bookId) {
+                const book = bookDataList.find(b => b.id === bookId);
+                if (!book) return;
+                document.getElementById('bookModalHeading').textContent = '📖 교재 진도 기록 · 수정';
+                document.getElementById('bookSubjectInput').value = book.subject || '';
+                document.getElementById('bookPriorityInput').value = book.priority || '';
+                document.getElementById('bookTitleInput').value = book.title || '';
+                document.getElementById('bookCurrentPageInput').value = Number(book.currentPage) || 0;
+                document.getElementById('bookTotalPageInput').value = Number(book.totalPage) || 100;
+                document.getElementById('bookLocationInput').value = book.lastLocation || '';
+                document.getElementById('bookStrategyInput').value = book.strategy || '';
+                if (delArea) delArea.classList.remove('hidden');
+            } else {
+                document.getElementById('bookModalHeading').textContent = '➕ 새 교재 진도 등록';
+                document.getElementById('bookSubjectInput').value = '공통수학2 (12/10)';
+                document.getElementById('bookPriorityInput').value = '집중 복습';
+                document.getElementById('bookTitleInput').value = '';
+                document.getElementById('bookCurrentPageInput').value = 0;
+                document.getElementById('bookTotalPageInput').value = 100;
+                document.getElementById('bookLocationInput').value = '';
+                document.getElementById('bookStrategyInput').value = '';
+                if (delArea) delArea.classList.add('hidden');
+            }
+
+            updateBookModalPctPreview();
+            document.getElementById('bookModal').classList.remove('hidden');
+        }
+
+        function updateBookModalPctPreview() {
+            const cur = Math.max(0, Number(document.getElementById('bookCurrentPageInput').value) || 0);
+            const tot = Math.max(1, Number(document.getElementById('bookTotalPageInput').value) || 100);
+            const pct = Math.min(100, Math.round((cur / tot) * 100));
+            const preview = document.getElementById('bookModalPctPreview');
+            if (preview) preview.textContent = `${cur}/${tot}p (${pct}%)`;
+        }
+
+        function adjustBookModalPage(delta) {
+            const curInp = document.getElementById('bookCurrentPageInput');
+            const totInp = document.getElementById('bookTotalPageInput');
+            const tot = Math.max(1, Number(totInp.value) || 100);
+            curInp.value = Math.min(tot, Math.max(0, (Number(curInp.value) || 0) + delta));
+            updateBookModalPctPreview();
+        }
+
+        function setBookModalComplete() {
+            const curInp = document.getElementById('bookCurrentPageInput');
+            const totInp = document.getElementById('bookTotalPageInput');
+            curInp.value = Math.max(1, Number(totInp.value) || 100);
+            updateBookModalPctPreview();
+        }
+
+        function saveBookProgress(event) {
+            event.preventDefault();
+            const errBox = document.getElementById('bookFormError');
+            const subject = document.getElementById('bookSubjectInput').value.trim();
+            const priority = document.getElementById('bookPriorityInput').value.trim() || '진도 관리';
+            const title = document.getElementById('bookTitleInput').value.trim();
+            const totalPage = Math.max(1, Number(document.getElementById('bookTotalPageInput').value) || 100);
+            const currentPage = Math.min(totalPage, Math.max(0, Number(document.getElementById('bookCurrentPageInput').value) || 0));
+            const lastLocation = document.getElementById('bookLocationInput').value.trim();
+            const strategy = document.getElementById('bookStrategyInput').value.trim();
+
+            if (!title) {
+                errBox.textContent = '⚠️ 교재명을 입력해 주세요.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            if (editingBookId) {
+                const idx = bookDataList.findIndex(b => b.id === editingBookId);
+                if (idx !== -1) {
+                    bookDataList[idx] = {
+                        ...bookDataList[idx],
+                        subject,
+                        priority,
+                        title,
+                        currentPage,
+                        totalPage,
+                        lastLocation,
+                        strategy
+                    };
+                }
+                showToast('💾 교재 진도가 저장되었습니다!');
+            } else {
+                bookDataList.push({
+                    id: 'book-' + Date.now(),
+                    subject,
+                    priority,
+                    title,
+                    currentPage,
+                    totalPage,
+                    lastLocation: lastLocation || '1단원 시작 전',
+                    strategy: strategy || '오답 문항 위주로 반복 회독하세요.',
+                    steps: ['시험범위 1회독 풀이', '틀린 문제 오답 정리', '시험 직전 최종 점검']
+                });
+                showToast('➕ 새 교재가 추가되었습니다!');
+            }
+
+            saveStorage(STORAGE_KEYS.BOOKS_DATA, bookDataList);
+            closeModal('bookModal');
+            renderBooksSection();
+        }
+
+        function armDeleteBook() {
+            document.getElementById('deleteBookStep1').classList.add('hidden');
+            document.getElementById('deleteBookConfirm').classList.remove('hidden');
+        }
+
+        function confirmDeleteBook() {
+            if (!editingBookId) return;
+            bookDataList = bookDataList.filter(b => b.id !== editingBookId);
+            saveStorage(STORAGE_KEYS.BOOKS_DATA, bookDataList);
+            closeModal('bookModal');
+            renderBooksSection();
+            showToast('🗑️ 교재가 삭제되었습니다');
+        }
+
+        /* ---------------------------------------------------------
+           12. 시험 기간 (12/9 ~ 12/16) 로드맵 렌더링
+        --------------------------------------------------------- */
+        function renderExamRoadmap() {
+            const container = document.getElementById('examRoadmapList');
+            if (!container) return;
+
+            container.innerHTML = EXAM_ROADMAP.map(row => `
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                    <div class="flex flex-wrap items-center justify-between gap-1.5">
+                        <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white text-[11px] font-extrabold">${escapeHtml(row.date)}</span>
+                        <span class="text-xs font-extrabold text-indigo-700 mono-gray">오후 목표: ${escapeHtml(row.after)}</span>
+                    </div>
+                    <div class="text-xs font-extrabold text-slate-800">오전 시험: ${escapeHtml(row.exam)}</div>
+                    <p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(row.detail)}</p>
+                </div>
+            `).join('');
+        }
+
+        /* ---------------------------------------------------------
+           13. 아이폰 홈 화면 위젯 (?widget=1) & 설정 모달
+        --------------------------------------------------------- */
+        function buildWidgetCardHtml(isStandaloneWidget) {
+            const { dayKey, dayFull, minutes, timeText } = getNowInfo();
+            const dDayText = document.getElementById('dDayBadge') ? document.getElementById('dDayBadge').textContent : 'D-19';
+            const todayItems = scheduleList
+                .filter(i => i.day === dayKey)
+                .sort((a, b) => toMin(a.start) - toMin(b.start));
+
+            const activeItem = todayItems.find(i => minutes >= toMin(i.start) && minutes < toMin(i.end));
+            const nextItem = todayItems.find(i => toMin(i.start) > minutes);
+            const doneCount = todayItems.filter(i => completedBlocks[i.id]).length;
+            const totalCount = todayItems.length;
+            const todayPct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+            // 진도율이 가장 낮은 핵심 교재 1권 표시
+            const sortedBooks = [...bookDataList].sort((a, b) => getBookPercent(a) - getBookPercent(b));
+            const focusBook = sortedBooks[0];
+            const focusBookPct = focusBook ? getBookPercent(focusBook) : 0;
+
+            let statusTag = '오늘 일정 마감';
+            let mainTitle = '오늘 계획 완료 👏';
+            let subLine = '푹 쉬고 내일 일정을 준비하세요';
+
+            if (activeItem) {
+                const remain = toMin(activeItem.end) - minutes;
+                statusTag = `NOW · ${remain}분 남음`;
+                mainTitle = `${activeItem.title}${activeItem.sub ? ' · ' + activeItem.sub : ''}`;
+                subLine = `${activeItem.start}~${activeItem.end} | ${activeItem.book || ''}`;
+            } else if (nextItem) {
+                const until = toMin(nextItem.start) - minutes;
+                statusTag = `다음 일정 · ${until}분 후`;
+                mainTitle = `${nextItem.title}${nextItem.sub ? ' · ' + nextItem.sub : ''}`;
+                subLine = `${nextItem.start}~${nextItem.end} | ${nextItem.book || ''}`;
+            }
+
+            const baseUrl = window.location.origin + window.location.pathname;
+
+            return `
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold">${escapeHtml(statusTag)}</span>
+                        <span class="text-[11px] font-bold text-slate-300">${dayFull} ${timeText}</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-md bg-white/15 text-amber-300 text-[11px] font-extrabold">${escapeHtml(dDayText)}</span>
+                </div>
+
+                <div class="space-y-0.5">
+                    <div class="text-base font-extrabold text-white truncate">${escapeHtml(mainTitle)}</div>
+                    <div class="text-[11px] text-slate-300 truncate">${escapeHtml(subLine)}</div>
+                </div>
+
+                <div class="space-y-1 pt-1 border-t border-white/15">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-slate-300 font-bold">오늘 달성 ${doneCount}/${totalCount} (${todayPct}%)</span>
+                        ${focusBook ? `<span class="text-emerald-300 font-extrabold truncate max-w-[55%]">📚 ${escapeHtml(focusBook.title)} ${focusBookPct}%</span>` : ''}
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-white/15 overflow-hidden">
+                        <div class="h-full bg-emerald-400 rounded-full" style="width: ${todayPct}%;"></div>
+                    </div>
+                </div>
+
+                ${isStandaloneWidget ? `
+                    <div class="pt-1 flex justify-end">
+                        <a href="${escapeHtml(baseUrl)}" target="_top"
+                            class="px-3 py-1.5 rounded-xl bg-white text-slate-950 text-[11px] font-extrabold">
+                            전체 플래너 열기 ↗
+                        </a>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function renderIosWidgetCard() {
+            const rootCard = document.getElementById('iosWidgetLiveCard');
+            if (rootCard) rootCard.innerHTML = buildWidgetCardHtml(true);
+        }
+
+        function openWidgetModal() {
+            const urlInp = document.getElementById('widgetUrlOutput');
+            const previewCard = document.getElementById('widgetModalPreviewCard');
+            const widgetUrl = window.location.origin + window.location.pathname + '?widget=1';
+            if (urlInp) urlInp.value = widgetUrl;
+            if (previewCard) previewCard.innerHTML = buildWidgetCardHtml(false);
+            document.getElementById('widgetModal').classList.remove('hidden');
+        }
+
+        function copyWidgetUrl() {
+            const inp = document.getElementById('widgetUrlOutput');
+            if (!inp) return;
+            inp.select();
+            inp.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('📋 위젯 전용 주소(?widget=1)가 복사되었습니다!');
+            } catch (e) {
+                showToast('주소를 길게 눌러 복사해 주세요');
+            }
+        }
+
+        /* ---------------------------------------------------------
+           14. 모달 닫기, 비밀번호(PIN) 잠금 및 데이터 관리
+        --------------------------------------------------------- */
+        function closeModal(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.classList.add('hidden');
+        }
+
+        function closeModalOnBackdrop(event, modalId) {
+            if (event.target && event.target.id === modalId) {
+                closeModal(modalId);
+            }
+        }
+
+        function getActivePinHash() {
+            const saved = loadStorage(STORAGE_KEYS.PIN_HASH, '');
+            return saved || DEFAULT_PIN_HASH;
+        }
+
+        function toggleInputVisibility(inputId, btn) {
+            const inp = document.getElementById(inputId);
+            if (!inp) return;
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                if (btn) btn.textContent = '🙈';
+            } else {
+                inp.type = 'password';
+                if (btn) btn.textContent = '👁️';
+            }
+        }
+
+        function unlockPlannerUI() {
+            document.body.classList.remove('locked-state');
+            const overlay = document.getElementById('pinLockOverlay');
+            if (overlay) overlay.classList.add('hidden');
+            updateStickyOffsets();
+        }
+
+        function lockPlannerNow() {
+            try {
+                localStorage.removeItem(STORAGE_KEYS.UNLOCKED_HASH);
+                sessionStorage.removeItem(STORAGE_KEYS.UNLOCKED_HASH);
+            } catch (e) {}
+            document.body.classList.add('locked-state');
+            const overlay = document.getElementById('pinLockOverlay');
+            const inp = document.getElementById('pinInputField');
+            const err = document.getElementById('pinErrorMsg');
+            if (overlay) overlay.classList.remove('hidden');
+            if (inp) {
+                inp.value = '';
+                inp.focus();
+            }
+            if (err) err.classList.add('hidden');
+        }
+
+        function submitPinUnlock(event) {
+            event.preventDefault();
+            const inp = document.getElementById('pinInputField');
+            const err = document.getElementById('pinErrorMsg');
+            const remember = document.getElementById('rememberDeviceCheck');
+            const entered = inp ? inp.value.trim() : '';
+            const activeHash = getActivePinHash();
+
+            if (computePinHash(entered) === activeHash) {
+                if (err) err.classList.add('hidden');
+                try {
+                    if (remember && remember.checked) {
+                        localStorage.setItem(STORAGE_KEYS.UNLOCKED_HASH, activeHash);
+                    } else {
+                        sessionStorage.setItem(STORAGE_KEYS.UNLOCKED_HASH, activeHash);
+                    }
+                } catch (e) {}
+                unlockPlannerUI();
+                showToast('🔓 잠금이 해제되었습니다');
+            } else {
+                if (err) err.classList.remove('hidden');
+                if (inp) {
+                    inp.value = '';
+                    inp.focus();
+                }
+            }
+        }
+
+        function refreshPinStatusUI() {
+            const badge = document.getElementById('pinStatusBadge');
+            const shareBox = document.getElementById('pinHashShareBox');
+            const hashOut = document.getElementById('pinHashOutput');
+            const currentHash = getActivePinHash();
+            const isCustom = currentHash !== DEFAULT_PIN_HASH;
+
+            if (badge) {
+                badge.textContent = isCustom ? '사용자 변경됨 ✓' : '기본값(1209)';
+                badge.className = isCustom
+                    ? 'px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-100 text-emerald-800 mono-gray'
+                    : 'px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-slate-200 text-slate-700';
+            }
+            if (shareBox && hashOut) {
+                if (isCustom) {
+                    shareBox.classList.remove('hidden');
+                    hashOut.value = currentHash;
+                } else {
+                    shareBox.classList.add('hidden');
+                }
+            }
+        }
+
+        function updateCustomPin(event) {
+            event.preventDefault();
+            const inp = document.getElementById('newPinInput');
+            const newPin = inp ? inp.value.trim() : '';
+            if (newPin.length < 4) {
+                showToast('⚠️ 비밀번호는 4자 이상으로 입력해 주세요');
+                return;
+            }
+            const newHash = computePinHash(newPin);
+            saveStorage(STORAGE_KEYS.PIN_HASH, newHash);
+            try {
+                localStorage.setItem(STORAGE_KEYS.UNLOCKED_HASH, newHash);
+            } catch (e) {}
+            if (inp) inp.value = '';
+            refreshPinStatusUI();
+            showToast('🔐 비밀번호가 변경되었습니다!');
+        }
+
+        function copyPinHashToClipboard() {
+            const out = document.getElementById('pinHashOutput');
+            if (!out) return;
+            out.select();
+            out.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('📋 암호화 키가 복사되었습니다');
+            } catch (e) {
+                showToast('키를 길게 눌러 복사해 주세요');
+            }
+        }
+
+        function downloadUpdatedHtmlWithPin() {
+            const currentHash = getActivePinHash();
+            let rawHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            rawHtml = rawHtml.replace(
+                /const DEFAULT_PIN_HASH = computePinHash\(String\.fromCharCode\(49, 50, 48, 57\)\);/,
+                `const DEFAULT_PIN_HASH = '${currentHash}';`
+            );
+            const blob = new Blob([rawHtml], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('📥 새 비밀번호가 적용된 index.html을 다운로드했습니다');
+        }
+
+        function openManageModal() {
+            document.getElementById('restoreDefaultStep1').classList.remove('hidden');
+            document.getElementById('restoreDefaultConfirm').classList.add('hidden');
+            refreshPinStatusUI();
+            document.getElementById('manageModal').classList.remove('hidden');
+        }
+
+        function resetChecksOnly() {
+            completedBlocks = {};
+            saveStorage(STORAGE_KEYS.COMPLETED, completedBlocks);
+            closeModal('manageModal');
+            refreshAllViews();
+            showToast('↺ 주간 완료 체크가 모두 초기화되었습니다');
+        }
+
+        function armRestoreDefault() {
+            document.getElementById('restoreDefaultStep1').classList.add('hidden');
+            document.getElementById('restoreDefaultConfirm').classList.remove('hidden');
+        }
+
+        function confirmRestoreDefault() {
+            scheduleList = JSON.parse(JSON.stringify(DEFAULT_SCHEDULE));
+            completedBlocks = {};
+            saveStorage(STORAGE_KEYS.SCHEDULE, scheduleList);
+            saveStorage(STORAGE_KEYS.COMPLETED, completedBlocks);
+            closeModal('manageModal');
+            refreshAllViews();
+            showToast('✅ 기본 시간표로 복원되었습니다');
+        }
+
+        /* ---------------------------------------------------------
+           15. 앱 초기화 및 실시간 타이머 시작
+        --------------------------------------------------------- */
+        function initPlannerApp() {
+            updateDDay();
+            applyMonoMode();
+
+            // ?widget=1 위젯 전용 모드로 접속한 경우
+            if (isWidgetMode) {
+                document.body.classList.remove('locked-state');
+                document.body.classList.add('widget-mode');
+                renderIosWidgetCard();
+                setInterval(renderIosWidgetCard, 30000);
+                return;
+            }
+
+            // 일반 모드: 잠금 상태 확인
+            const activeHash = getActivePinHash();
+            let savedUnlock = '';
+            try {
+                savedUnlock = localStorage.getItem(STORAGE_KEYS.UNLOCKED_HASH) || sessionStorage.getItem(STORAGE_KEYS.UNLOCKED_HASH) || '';
+            } catch (e) {}
+
+            if (savedUnlock === activeHash) {
+                unlockPlannerUI();
+            }
+
+            const nowInfo = getNowInfo();
+            selectedDayKey = nowInfo.dayKey;
+
+            if (!currentLayout) {
+                currentLayout = window.innerWidth < 768 ? 'day' : 'week';
+            }
+
+            renderNowDashboard();
+            renderFilterBar();
+            setGridLayout(currentLayout, false);
+            renderTodoSection();
+            renderBooksSection();
+            renderExamRoadmap();
+            updateStickyOffsets();
+
+            window.addEventListener('resize', updateStickyOffsets);
+            setInterval(() => {
+                renderNowDashboard();
+                if (currentLayout === 'day') renderSingleDayView();
+                else renderWeekGrid();
+            }, 30000);
+        }
+
+        window.addEventListener('DOMContentLoaded', initPlannerApp);
+    </script>
+</body>
+</html>
