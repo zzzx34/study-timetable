@@ -8,10 +8,10 @@
   <!-- iOS 홈 화면 웹앱(PWA) 메타 태그 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="운양기말플래너">
+  <meta name="apple-mobile-web-app-title" content="기말플래너">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta id="metaThemeColor" name="theme-color" content="#f2f2f7">
-  <title>운양고 1학년 기말 학습 플래너</title>
+  <title>기말 학습 플래너</title>
 
   <!-- Pretendard 웹폰트 CDN -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -353,6 +353,81 @@
     #mainScrollArea {
       padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
     }
+
+    /* ---------------------------------------------------------------
+       부드러운 페이드 인 · 아웃 (토스트 · 모달 · 바텀시트 · 잠금화면)
+    --------------------------------------------------------------- */
+    /* 토스트: 살짝 떠오르며 나타나고, 사라질 때도 서서히 투명해진다 */
+    #toastBanner {
+      opacity: 0;
+      transform: translate(-50%, 10px) scale(0.98);
+      transition: opacity 0.26s ease, transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    #toastBanner.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0) scale(1);
+    }
+
+    /* 모달 · 바텀시트: 배경은 은은하게, 시트는 아래에서 밀려 올라오며 등장 */
+    .modal-fx {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .modal-fx > .modal-sheet {
+      opacity: 0;
+      transform: translateY(16px) scale(0.985);
+      transition: opacity 0.22s ease, transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    .modal-fx.is-shown {
+      opacity: 1;
+    }
+    .modal-fx.is-shown > .modal-sheet {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    /* 큰 화면에서는 가운데 카드가 살짝 확대되며 등장 */
+    @media (min-width: 640px) {
+      .modal-fx > .modal-sheet {
+        transform: translateY(8px) scale(0.97);
+      }
+    }
+
+    /* 잠금화면 오버레이: 잠글 때와 풀 때 모두 부드럽게 */
+    #pinLockOverlay {
+      transition: opacity 0.26s ease;
+    }
+    #pinLockOverlay > div {
+      transition: opacity 0.26s ease, transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    #pinLockOverlay.is-hiding {
+      opacity: 0;
+    }
+    #pinLockOverlay.is-hiding > div {
+      transform: scale(0.97);
+    }
+
+    /* 움직임을 줄이는 설정에서는 시간만 짧게 */
+    @media (prefers-reduced-motion: reduce) {
+      #toastBanner {
+        transform: translate(-50%, 0);
+        transition: opacity 0.12s linear;
+      }
+      .modal-fx {
+        transition: opacity 0.12s linear;
+      }
+      .modal-fx > .modal-sheet,
+      .modal-fx.is-shown > .modal-sheet {
+        transform: none;
+        transition: opacity 0.12s linear;
+      }
+      #pinLockOverlay > div,
+      #pinLockOverlay.is-hiding > div {
+        transform: none;
+        transition: opacity 0.12s linear;
+      }
+    }
   </style>
 
   <!-- 카카오톡 인앱 브라우저 감지 및 외부 브라우저 열기 안내 -->
@@ -386,7 +461,7 @@
         🔒
       </div>
       <div class="space-y-1">
-        <h1 class="text-xl font-extrabold ap-text">운양고 기말 플래너</h1>
+        <h1 class="text-xl font-extrabold ap-text">기말 학습 플래너</h1>
         <p class="text-xs ap-sub">개인 학습 시간표 보호를 위해 비밀번호를 입력해 주세요.</p>
       </div>
 
@@ -457,7 +532,7 @@
     <header id="appHeader" class="sticky top-0 z-30 w-full">
       <div class="max-w-3xl mx-auto h-full px-4 flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <h1 class="text-[15px] sm:text-base font-extrabold ap-text truncate">운양고 기말 플래너</h1>
+          <h1 class="text-[15px] sm:text-base font-extrabold ap-text truncate">기말 학습 플래너</h1>
           <span id="headerDDayBadge" class="mono-invert shrink-0 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[11px] font-extrabold tabular-nums">
             D-19
           </span>
@@ -695,7 +770,7 @@
           <div id="booksCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
         </div>
 
-        <!-- 서브뷰 B: 운양고 2026 2학기 2차 정기시험 시간표 & 오후 전략 -->
+        <!-- 서브뷰 B: 2026 2학기 2차 정기시험 시간표 & 오후 전략 -->
         <div id="booksSubView-exam" class="hidden space-y-3">
           <div class="ap-card p-4 space-y-1.5">
             <div class="flex items-center justify-between gap-2">
@@ -806,7 +881,7 @@
 
           <div class="ap-tile p-3 text-[11px] ap-sub leading-relaxed space-y-1">
             <p class="font-extrabold ap-text">📌 아이폰 캘린더 적용 3단계</p>
-            <p>1. 위 다운로드 버튼을 눌러 <code>unyango_final_schedule.ics</code> 저장</p>
+            <p>1. 위 다운로드 버튼을 눌러 <code>final_schedule.ics</code> 저장</p>
             <p>2. Safari 다운로드 목록 또는 <strong>「파일」</strong> 앱에서 해당 파일을 터치</p>
             <p>3. 우측 상단 <strong>「모두 추가」</strong>를 누르면 10분 전 잠금화면 알림 자동 등록 끝!</p>
           </div>
@@ -838,7 +913,7 @@
           <div class="ap-tile p-3 text-[11px] ap-sub leading-relaxed space-y-1">
             <p class="font-extrabold ap-text">📌 잠금화면 위젯 설치법 (무료 앱 Scriptable)</p>
             <p>1. App Store에서 무료 앱 <strong>「Scriptable」</strong> 설치 후 우측 상단 <strong>+</strong> 버튼 터치</p>
-            <p>2. 복사한 코드를 그대로 붙여넣고 이름을 <strong>운양플래너</strong>로 저장</p>
+            <p>2. 복사한 코드를 그대로 붙여넣고 이름을 <strong>기말플래너</strong>로 저장</p>
             <p>3. 아이폰 <strong>잠금화면 길게 누르기 → 사용자화 → 위젯 추가 → Scriptable</strong> 선택 후 방금 만든 스크립트 지정!</p>
           </div>
         </div>
@@ -890,7 +965,7 @@
               <div class="grid grid-cols-2 gap-2">
                 <div>
                   <label class="block text-[10px] font-bold ap-muted mb-1">큰 글자 / 이모지</label>
-                  <input type="text" id="icMainText" value="운양" maxlength="6" oninput="renderIconMaker()"
+                  <input type="text" id="icMainText" value="기말" maxlength="6" oninput="renderIconMaker()"
                     class="w-full px-2.5 py-2 rounded-xl text-xs font-extrabold">
                 </div>
                 <div>
@@ -973,8 +1048,8 @@
   ===================================================================== -->
 
   <!-- 모달 1: 일정 상세 보기 -->
-  <div id="eventDetailModal" class="hidden fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeBackdrop(event, 'eventDetailModal')">
-    <div class="ap-card w-full sm:max-w-md rounded-b-none sm:rounded-[22px] rounded-t-[24px] p-5 space-y-4 max-h-[88vh] overflow-y-auto">
+  <div id="eventDetailModal" class="modal-fx hidden fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeBackdrop(event, 'eventDetailModal')">
+    <div class="modal-sheet ap-card w-full sm:max-w-md rounded-b-none sm:rounded-[22px] rounded-t-[24px] p-5 space-y-4 max-h-[88vh] overflow-y-auto">
       <div class="flex items-start justify-between gap-2">
         <div class="space-y-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
@@ -1011,8 +1086,8 @@
   </div>
 
   <!-- 모달 2: 일정 추가 · 수정 · 개별 색상 지정 (모바일 grid-cols-1 시간 겹침 제로) -->
-  <div id="eventEditModal" class="hidden fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeBackdrop(event, 'eventEditModal')">
-    <div class="ap-card w-full sm:max-w-md rounded-b-none sm:rounded-[22px] rounded-t-[24px] p-5 space-y-3.5 max-h-[90vh] overflow-y-auto">
+  <div id="eventEditModal" class="modal-fx hidden fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeBackdrop(event, 'eventEditModal')">
+    <div class="modal-sheet ap-card w-full sm:max-w-md rounded-b-none sm:rounded-[22px] rounded-t-[24px] p-5 space-y-3.5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between">
         <h3 id="evModalHeading" class="text-base font-extrabold ap-text">＋ 새 일정 추가</h3>
         <button type="button" onclick="closeModal('eventEditModal')" class="w-8 h-8 rounded-full ap-tile flex items-center justify-center text-sm font-bold ap-sub">✕</button>
@@ -1108,8 +1183,8 @@
   </div>
 
   <!-- 모달 3: 투두 · 기간제 수행평가 추가/수정 (모바일 날짜 grid-cols-1) -->
-  <div id="todoEditModal" class="hidden fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeBackdrop(event, 'todoEditModal')">
-    <div class="ap-card w-full sm:max-w-md rounded-b-none sm:rounded-[22px] rounded-t-[24px] p-5 space-y-3.5 max-h-[90vh] overflow-y-auto">
+  <div id="todoEditModal" class="modal-fx hidden fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeBackdrop(event, 'todoEditModal')">
+    <div class="modal-sheet ap-card w-full sm:max-w-md rounded-b-none sm:rounded-[22px] rounded-t-[24px] p-5 space-y-3.5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between">
         <h3 id="tdModalHeading" class="text-base font-extrabold ap-text">＋ 새 투두 · 수행평가</h3>
         <button type="button" onclick="closeModal('todoEditModal')" class="w-8 h-8 rounded-full ap-tile flex items-center justify-center text-sm font-bold ap-sub">✕</button>
@@ -1189,8 +1264,8 @@
   </div>
 
   <!-- 모달 4: 교재 진도 기록 · 추가 · 수정 -->
-  <div id="bookEditModal" class="hidden fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeBackdrop(event, 'bookEditModal')">
-    <div class="ap-card w-full sm:max-w-md rounded-b-none sm:rounded-[22px] rounded-t-[24px] p-5 space-y-3.5 max-h-[90vh] overflow-y-auto">
+  <div id="bookEditModal" class="modal-fx hidden fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeBackdrop(event, 'bookEditModal')">
+    <div class="modal-sheet ap-card w-full sm:max-w-md rounded-b-none sm:rounded-[22px] rounded-t-[24px] p-5 space-y-3.5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between">
         <h3 id="bkModalHeading" class="text-base font-extrabold ap-text">📖 교재 진도 기록</h3>
         <button type="button" onclick="closeModal('bookEditModal')" class="w-8 h-8 rounded-full ap-tile flex items-center justify-center text-sm font-bold ap-sub">✕</button>
@@ -1263,8 +1338,8 @@
   </div>
 
   <!-- 모달 5: 설정 · 비밀번호 · 백업 · 잠금 · 초기화 -->
-  <div id="settingsModal" class="hidden fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeBackdrop(event, 'settingsModal')">
-    <div class="ap-card w-full sm:max-w-md rounded-b-none sm:rounded-[22px] rounded-t-[24px] p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+  <div id="settingsModal" class="modal-fx hidden fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="closeBackdrop(event, 'settingsModal')">
+    <div class="modal-sheet ap-card w-full sm:max-w-md rounded-b-none sm:rounded-[22px] rounded-t-[24px] p-5 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between">
         <h3 class="text-base font-extrabold ap-text">⚙️ 설정 · 보안 · 백업</h3>
         <button type="button" onclick="closeModal('settingsModal')" class="w-8 h-8 rounded-full ap-tile flex items-center justify-center text-sm font-bold ap-sub">✕</button>
@@ -1358,7 +1433,7 @@
   </div>
 
   <!-- 하단 토스트 알림 (alert 대체) -->
-  <div id="toastBanner" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-slate-900 text-white text-xs font-extrabold shadow-xl max-w-[90vw] text-center pointer-events-none"></div>
+  <div id="toastBanner" class="hidden fixed bottom-24 left-1/2 z-50 px-4 py-2.5 rounded-2xl bg-slate-900 text-white text-xs font-extrabold shadow-xl max-w-[90vw] text-center pointer-events-none"></div>
 
   <!-- =====================================================================
        5. 자바스크립트 애플리케이션 로직
@@ -1430,7 +1505,7 @@
       { hex: '#334155', name: '슬레이트' }
     ];
 
-    // 운양고 1학년 기본 스케줄 데이터
+    // 기본 스케줄 데이터
     const DEFAULT_EVENTS = [
       // 월 (0)
       { id: 'm1', day: 0, start: '08:30', end: '17:00', cat: 'school',   title: '학교 수업', book: '자투리: 영단어 암기', desc: '쉬는 시간·점심시간 영단어 및 시험 범위 프린트 점검', color: '' },
@@ -1518,7 +1593,7 @@
       }
     ];
 
-    // 운양고 2026 2학기 2차 정기시험 시간표 & 오후 전략
+    // 2026 2학기 2차 정기시험 시간표 & 오후 전략
     const EXAM_SCHEDULE = [
       { dateIso: '2026-12-09', date: '12월 9일 (수)',  time: '11:40~12:30', subj: '3교시 통합사회2', tip: '시험 종료 후 오후~밤 전체를 [공통수학2] 최종 모의풀이 및 오답 복습에 투자!' },
       { dateIso: '2026-12-10', date: '12월 10일 (목)', time: '11:40~12:30', subj: '3교시 공통수학2(논)', tip: '오후~밤 전체를 [통합과학2] 완자 기출픽·1등급마스터 오답 및 서술형 암기에 올인!' },
@@ -1797,6 +1872,7 @@
     let uploadedIconImg = null;
     let cleanHtmlSnapshot = '';
     let toastTimeout = null;
+    let toastHideTimer = null;
 
     // 집중 타이머 상태
     let timerTotalSec = 25 * 60;
@@ -1863,9 +1939,16 @@
       const el = document.getElementById('toastBanner');
       if (!el) return;
       el.textContent = msg;
-      el.classList.remove('hidden');
       if (toastTimeout) clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => el.classList.add('hidden'), 2600);
+      if (toastHideTimer) clearTimeout(toastHideTimer);
+      el.classList.remove('hidden');
+      // display:none → 표시로 바뀐 직후 시작 상태를 한 번 확정해야 페이드 인이 적용된다
+      void el.offsetWidth;
+      el.classList.add('is-visible');
+      toastTimeout = setTimeout(() => {
+        el.classList.remove('is-visible');            // 먼저 서서히 사라지고
+        toastHideTimer = setTimeout(() => el.classList.add('hidden'), 300);  // 그 뒤에 숨긴다
+      }, 2600);
     }
 
     function fireConfetti() {
@@ -2083,7 +2166,17 @@
     function unlockAppUI() {
       document.body.classList.remove('is-locked');
       const lockEl = document.getElementById('pinLockOverlay');
-      if (lockEl) lockEl.classList.add('hidden');
+      if (lockEl && !lockEl.classList.contains('hidden')) {
+        // 잠금화면을 서서히 걷어 내며 앱이 드러나게 한다
+        lockEl.classList.add('is-hiding');
+        setTimeout(() => {
+          lockEl.classList.add('hidden');
+          lockEl.classList.remove('is-hiding');
+        }, 270);
+      } else if (lockEl) {
+        lockEl.classList.add('hidden');
+        lockEl.classList.remove('is-hiding');
+      }
       renderAllViews();
     }
 
@@ -2117,7 +2210,13 @@
       } catch (e) {}
       document.body.classList.add('is-locked');
       const lockEl = document.getElementById('pinLockOverlay');
-      if (lockEl) lockEl.classList.remove('hidden');
+      if (lockEl) {
+        lockEl.classList.remove('hidden');
+        // 투명한 상태에서 시작해 부드럽게 나타난다
+        lockEl.classList.add('is-hiding');
+        void lockEl.offsetWidth;
+        lockEl.classList.remove('is-hiding');
+      }
       const inp = document.getElementById('pinInputField');
       if (inp) { inp.value = ''; setTimeout(() => inp.focus(), 60); }
       document.getElementById('pinErrorMsg').classList.add('hidden');
@@ -2197,11 +2296,26 @@
 
     function openModal(id) {
       const el = document.getElementById(id);
-      if (el) el.classList.remove('hidden');
+      if (!el) return;
+      if (el.__closeTimer) { clearTimeout(el.__closeTimer); el.__closeTimer = null; }
+      const alreadyShown = !el.classList.contains('hidden') && el.classList.contains('is-shown');
+      el.classList.remove('hidden');
+      if (alreadyShown) return;
+      // 시작 상태(opacity 0)를 확정한 뒤 클래스를 붙여야 transition이 재생된다
+      void el.offsetWidth;
+      el.classList.add('is-shown');
     }
     function closeModal(id) {
       const el = document.getElementById(id);
-      if (el) el.classList.add('hidden');
+      if (!el) return;
+      if (el.classList.contains('hidden')) return;
+      el.classList.remove('is-shown');
+      if (el.__closeTimer) clearTimeout(el.__closeTimer);
+      // 페이드 아웃이 끝난 뒤에 hidden 처리 (뚝 끊기지 않도록)
+      el.__closeTimer = setTimeout(() => {
+        el.__closeTimer = null;
+        el.classList.add('hidden');
+      }, 320);
     }
     function closeBackdrop(e, id) {
       if (e.target && e.target.id === id) closeModal(id);
@@ -2534,7 +2648,7 @@
         showToast(`🎉 [${timerLabel}] 집중 완료! 잠깐 쉬어 가세요`);
         if ('Notification' in window && Notification.permission === 'granted') {
           try {
-            new Notification('운양고 기말 플래너', { body: `${timerLabel}가 끝났습니다! 수고했어요 🎉` });
+            new Notification('기말 학습 플래너', { body: `${timerLabel}가 끝났습니다! 수고했어요 🎉` });
           } catch (e) {}
         }
         updateTimerUI();
@@ -3612,9 +3726,9 @@
       const lines = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
-        'PRODID:-//UnyangHigh//FinalPlanner2026//KO',
+        'PRODID:-//FinalPlanner2026//KO',
         'CALSCALE:GREGORIAN',
-        'X-WR-CALNAME:운양고 1학년 기말 플래너',
+        'X-WR-CALNAME:기말 학습 플래너',
         'X-WR-TIMEZONE:Asia/Seoul'
       ];
 
@@ -3686,7 +3800,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'unyango_final_schedule.ics';
+      a.download = 'final_schedule.ics';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -3709,7 +3823,7 @@
       playChimeSound();
       if ('Notification' in window && Notification.permission === 'granted') {
         try {
-          new Notification('운양고 기말 플래너 🔔', { body: '알림이 정상 작동합니다! 오늘 공부도 파이팅!' });
+          new Notification('기말 학습 플래너 🔔', { body: '알림이 정상 작동합니다! 오늘 공부도 파이팅!' });
           showToast('🔔 테스트 알림을 보냈습니다');
           return;
         } catch (e) {}
@@ -3722,7 +3836,7 @@
       const box = document.getElementById('scriptableCodeBox');
       if (!box) return;
       const compactEvents = events.map(e => ({ d: e.day, s: e.start, e: e.end, t: e.title, b: e.book || '' }));
-      const code = `// 운양고 1학년 기말 플래너 · iOS 잠금화면 & 홈화면 라이브 위젯 (Scriptable)
+      const code = `// 기말 학습 플래너 · iOS 잠금화면 & 홈화면 라이브 위젯 (Scriptable)
 const EXAM_DATE = "${EXAM_START_DATE}";
 const EVENTS = ${JSON.stringify(compactEvents)};
 
@@ -3758,7 +3872,7 @@ if (config.widgetFamily === "accessoryInline") {
   w.backgroundGradient = grad;
   w.setPadding(14, 16, 14, 16);
 
-  const top = w.addText(\`운양고 기말 D-\${dDay}\`);
+  const top = w.addText(\`기말 D-\${dDay}\`);
   top.font = Font.boldSystemFont(12);
   top.textColor = new Color("#fda4af");
   w.addSpacer(4);
@@ -3906,7 +4020,7 @@ Script.complete();`;
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `unyango_planner_backup_${getTodayIso()}.json`;
+      a.download = `planner_backup_${getTodayIso()}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -3966,7 +4080,7 @@ Script.complete();`;
       cancelReset('All');
       closeModal('settingsModal');
       renderAllViews();
-      showToast('🔄 운양고 기본 시간표·교재로 복원했습니다');
+      showToast('🔄 기본 시간표·교재로 복원했습니다');
     }
 
     /* -------------------------------------------------------------------
