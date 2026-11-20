@@ -1308,6 +1308,12 @@
         </button>
       </div>
 
+      <!-- 클라우드 동기화 상태 -->
+      <div class="ap-tile p-3.5 flex items-center justify-between gap-2">
+        <span class="text-xs font-extrabold ap-text">☁️ 클라우드 동기화</span>
+        <span id="cloudSyncStatus" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ap-card ap-sub">연결 중…</span>
+      </div>
+
       <!-- JSON 데이터 백업 / 불러오기 -->
       <div class="ap-tile p-3.5 space-y-2">
         <div class="text-xs font-extrabold ap-text">💾 데이터 백업 · 복원 (JSON)</div>
@@ -1524,7 +1530,7 @@
     ];
 
     /* -------------------------------------------------------------------
-       2. 전역 상태 및 안전한 localStorage 래퍼
+       2. 전역 상태 및 안전한 localStorage 래퍼 + Supabase 클라우드 동기화
     ------------------------------------------------------------------- */
     function readStore(key, fallback) {
       try {
@@ -1538,6 +1544,235 @@
       try {
         localStorage.setItem(key, JSON.stringify(val));
       } catch (e) {}
+      // 동기화 대상 키는 클라우드에도 반영 (실패해도 기기 저장은 이미 끝난 상태)
+      if (SYNC_KEYS.indexOf(key) !== -1) queueCloudWrite(key, val);
+    }
+
+    /* ---- Supabase 클라우드 동기화 ----
+       폰·PC 어디서 열어도 같은 시간표·체크·투두·교재를 보도록 planner_kv 테이블과
+       양방향 동기화한다. 화면 전용 설정(THEME·TT_MODE·W_CFG·UNLOCKED)은 이 기기에만 저장. */
+    const SB_URL = 'https://ulaxmsssquhchwuxxdeq.supabase.co';
+    const SB_KEY = 'sb_publishable_8jVnRXyQKvvQp73TaKgaug_2WLNWwPL';
+    const SB_TABLE = 'planner_kv';
+    const SYNC_KEYS = [KEYS.EVENTS, KEYS.CHECKS, KEYS.TODOS, KEYS.BOOKS, KEYS.PIN_HASH];
+
+    const sbState = {
+      ready: false,      // 첫 클라우드 읽기 완료 여부
+      inflight: false,
+      pending: {},       // key -> 아직 올리지 못한 값
+      timers: {},
+      cloudJson: {},     // 마지막으로 클라우드와 일치했던 JSON 문자열
+      lastOk: 0,
+      lastError: 0,
+      online: true
+    };
+
+    function sbHeaders() {
+      return {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json'
+      };
+    }
+
+    function sbJson(val) {
+      try { return JSON.stringify(val); } catch (e) { return null; }
+    }
+
+    function readRawPin() {
+      try {
+        const raw = localStorage.getItem(KEYS.PIN_HASH);
+        return raw !== null ? JSON.parse(raw) : '';
+      } catch (e) { return ''; }
+    }
+
+    function sbGetLocal(key) {
+      switch (key) {
+        case KEYS.EVENTS: return events;
+        case KEYS.CHECKS: return checkMap;
+        case KEYS.TODOS: return todos;
+        case KEYS.BOOKS: return books;
+        case KEYS.PIN_HASH: return readRawPin();
+        default: return undefined;
+      }
+    }
+
+    // 클라우드에서 받은 값을 메모리 + localStorage에 반영 (다시 클라우드로 되쏘지 않음)
+    function sbSetLocal(key, val) {
+      switch (key) {
+        case KEYS.EVENTS: events = val; break;
+        case KEYS.CHECKS: checkMap = val; break;
+        case KEYS.TODOS: todos = val; break;
+        case KEYS.BOOKS: books = val; break;
+        default: break;
+      }
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+      sbState.cloudJson[key] = sbJson(val);
+    }
+
+    function updateSyncStatusUI() {
+      const el = document.getElementById('cloudSyncStatus');
+      if (!el) return;
+      if (!sbState.online) {
+        el.textContent = '⚠️ 오프라인 · 기기에 저장 중';
+        el.className = 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/15 text-rose-500';
+        return;
+      }
+      el.className = 'px-2 py-0.5 rounded-full text-[10px] font-extrabold ap-card ap-sub';
+      if (!sbState.ready) {
+        el.textContent = '☁️ 연결 중…';
+        return;
+      }
+      const d = new Date(sbState.lastOk || Date.now());
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      el.textContent = `☁️ 연결됨 · ${hh}:${mm} 동기화`;
+    }
+
+    function notifySyncError() {
+      updateSyncStatusUI();
+      const now = Date.now();
+      if (now - sbState.lastError < 60000) return; // 알림은 1분에 한 번만
+      sbState.lastError = now;
+      showToast('⚠️ 클라우드 동기화 지연 · 이 기기에는 저장됐어요');
+    }
+
+    async function sbUpsert(key, val) {
+      const json = sbJson(val);
+      try {
+        const res = await fetch(`${SB_URL}/rest/v1/${SB_TABLE}?on_conflict=id`, {
+          method: 'POST',
+          headers: Object.assign(sbHeaders(), { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+          body: JSON.stringify({ id: key, value: val })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        sbState.lastOk = Date.now();
+        sbState.online = true;
+        if (json !== null) sbState.cloudJson[key] = json;
+        updateSyncStatusUI();
+      } catch (e) {
+        sbState.online = false;
+        notifySyncError();
+        throw e;
+      }
+    }
+
+    function flushCloudWrite(key) {
+      if (sbState.timers[key]) { clearTimeout(sbState.timers[key]); delete sbState.timers[key]; }
+      if (!(key in sbState.pending)) return Promise.resolve();
+      const val = sbState.pending[key];
+      delete sbState.pending[key];
+      return sbUpsert(key, val).catch(() => {
+        // 실패분은 대기열로 되돌려 다음 기회(포커스·15초 주기)에 다시 시도
+        if (!(key in sbState.pending)) sbState.pending[key] = val;
+      });
+    }
+
+    function queueCloudWrite(key, val) {
+      const json = sbJson(val);
+      if (json === null) return;
+      if (sbState.cloudJson[key] === json) return; // 클라우드와 같은 값이면 올릴 필요 없음
+      sbState.pending[key] = val;
+      if (!sbState.ready) return; // 첫 클라우드 읽기 전에는 올리지 않고 보류 (덮어쓰기 사고 방지)
+      if (sbState.timers[key]) clearTimeout(sbState.timers[key]);
+      sbState.timers[key] = setTimeout(() => flushCloudWrite(key), 600);
+    }
+
+    // 클라우드 행을 현재 상태와 비교해 다를 때만 반영. 반영 여부를 돌려준다.
+    function applyCloudRows(cloud) {
+      let changed = false;
+      SYNC_KEYS.forEach(key => {
+        if (key in sbState.pending) return; // 이 기기에서 방금 바꾼 값이 우선
+        const val = cloud[key];
+        if (val === undefined || val === null) return;
+
+        if (key === KEYS.PIN_HASH) {
+          // 잠금 사고 방지: 이 기기에 직접 설정한 비밀번호가 있으면 클라우드 값으로 바꾸지 않는다
+          if (readRawPin()) return;
+          if (typeof val !== 'string' || !val) return;
+          sbSetLocal(key, val);
+          refreshLocalPinResetUI();
+          return;
+        }
+
+        if (key === KEYS.EVENTS && !Array.isArray(val)) return;
+        if (key !== KEYS.EVENTS && !(Array.isArray(val) || typeof val === 'object')) return;
+
+        if (sbJson(sbGetLocal(key)) === sbJson(val)) { sbState.cloudJson[key] = sbJson(val); return; }
+        sbSetLocal(key, val);
+        changed = true;
+      });
+      return changed;
+    }
+
+    // 클라우드에 아직 없는 키는 지금 이 기기 값을 그대로 올려 양쪽을 맞춘다
+    function seedMissingKeys(cloud) {
+      [KEYS.EVENTS, KEYS.CHECKS, KEYS.TODOS, KEYS.BOOKS].forEach(key => {
+        if (cloud[key] === undefined) queueCloudWrite(key, sbGetLocal(key));
+      });
+    }
+
+    async function sbPull(opts) {
+      const silent = !!(opts && opts.silent);
+      if (sbState.inflight) return;
+      sbState.inflight = true;
+      try {
+        const res = await fetch(`${SB_URL}/rest/v1/${SB_TABLE}?select=id,value`, {
+          headers: sbHeaders(),
+          cache: 'no-store'
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const rows = await res.json();
+        const cloud = {};
+        (Array.isArray(rows) ? rows : []).forEach(r => { if (r && r.id) cloud[r.id] = r.value; });
+
+        const changed = applyCloudRows(cloud);
+        sbState.lastOk = Date.now();
+        sbState.online = true;
+
+        if (!sbState.ready) {
+          sbState.ready = true;
+          seedMissingKeys(cloud);
+          Object.keys(sbState.pending).forEach(k => flushCloudWrite(k));
+        }
+        updateSyncStatusUI();
+
+        if (changed) {
+          if (typeof IS_WIDGET_MODE !== 'undefined' && IS_WIDGET_MODE) renderStandaloneWidget();
+          else renderAllViews();
+        }
+      } catch (e) {
+        sbState.online = false;
+        if (!silent) notifySyncError();
+        else updateSyncStatusUI();
+      } finally {
+        sbState.inflight = false;
+      }
+    }
+
+    function startCloudSync() {
+      sbPull();
+
+      // 15초마다: 보낼 게 있으면 보내고, 화면이 보일 때만 클라우드 변경 확인
+      setInterval(() => {
+        if (document.visibilityState !== 'visible') return;
+        Object.keys(sbState.pending).forEach(k => flushCloudWrite(k));
+        sbPull({ silent: true });
+      }, 15000);
+
+      window.addEventListener('focus', () => {
+        if (document.visibilityState !== 'visible') return;
+        Object.keys(sbState.pending).forEach(k => flushCloudWrite(k));
+        sbPull({ silent: true });
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible') return;
+        Object.keys(sbState.pending).forEach(k => flushCloudWrite(k));
+        sbPull({ silent: true });
+      });
+
+      window.addEventListener('online', () => sbPull({ silent: true }));
     }
 
     let events = readStore(KEYS.EVENTS, JSON.parse(JSON.stringify(DEFAULT_EVENTS)));
@@ -1838,9 +2073,11 @@
         localStorage.removeItem(KEYS.UNLOCKED);
         sessionStorage.removeItem(KEYS.UNLOCKED);
       } catch (e) {}
+      // 클라우드에 비밀번호를 되살리면 초기화가 무효가 되므로 클라우드 쪽도 비운다
+      queueCloudWrite(KEYS.PIN_HASH, '');
       refreshLocalPinResetUI();
       document.getElementById('pinErrorMsg').classList.add('hidden');
-      showToast('🔓 이 기기 저장 비밀번호를 초기값으로 복원했습니다');
+      showToast('🔓 저장된 비밀번호를 초기값(1209)으로 복원했습니다');
     }
 
     function unlockAppUI() {
@@ -1893,6 +2130,7 @@
       if (badge) {
         badge.textContent = custom ? '변경됨 ✓' : '파일 기본값';
       }
+      updateSyncStatusUI();
       document.getElementById('newPinField').value = '';
       cancelReset('Check');
       cancelReset('All');
@@ -3761,6 +3999,7 @@ Script.complete();`;
           document.body.classList.add('is-widget');
           renderStandaloneWidget();
           setInterval(renderStandaloneWidget, 1000);
+          startCloudSync();
           return;
         }
 
@@ -3768,6 +4007,7 @@ Script.complete();`;
         applyTheme(currentTheme);
         updateDDayHeader();
         refreshLocalPinResetUI();
+        startCloudSync();
 
         const targetHash = getActivePinHash();
         let savedUnlock = '';
