@@ -349,6 +349,26 @@
       background-color: var(--card);
     }
 
+    /* 전체 7일 그리드 확대·축소(한눈에 보기) 모드 */
+    #weekScrollInner { min-width: 680px; }
+    .week-zoom-large #weekScrollInner { min-width: 860px; }
+    .week-zoom-fit #weekScrollInner { min-width: 0; }
+    .week-zoom-fit #weekHeaderRow,
+    .week-zoom-fit #weekBodyGrid {
+      grid-template-columns: 28px repeat(7, minmax(0, 1fr)) !important;
+      gap: 2px !important;
+    }
+    .week-zoom-large #weekHeaderRow,
+    .week-zoom-large #weekBodyGrid {
+      grid-template-columns: 54px repeat(7, minmax(104px, 1fr)) !important;
+    }
+    .week-zoom-fit .ev-block {
+      border-radius: 6px;
+    }
+    .week-zoom-fit .week-day-col {
+      border-radius: 6px;
+    }
+
     /* 메인 하단 여백 (하단 고정 탭바 + 아이폰 홈 인디케이터 대응) */
     #mainScrollArea {
       padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
@@ -681,6 +701,16 @@
 
           <!-- 과목 필터 칩 -->
           <div id="subjectFilterBar" class="flex flex-wrap gap-1.5"></div>
+
+          <!-- 전체 7일 보기 전용: 확대·축소(한눈에) 컨트롤 -->
+          <div id="weekZoomBar" class="hidden items-center justify-between gap-2 pt-0.5">
+            <span class="text-[11px] font-extrabold ap-muted shrink-0">🔍 주간 화면 크기</span>
+            <div class="ap-seg grid-cols-3 flex-1 max-w-[212px]" style="padding:3px;">
+              <button type="button" id="weekZoomBtn-fit" onclick="setWeekZoom('fit')" style="padding:7px 4px; font-size:11px;">한눈에</button>
+              <button type="button" id="weekZoomBtn-normal" onclick="setWeekZoom('normal')" style="padding:7px 4px; font-size:11px;">보통</button>
+              <button type="button" id="weekZoomBtn-large" onclick="setWeekZoom('large')" style="padding:7px 4px; font-size:11px;">크게</button>
+            </div>
+          </div>
         </div>
 
         <!-- 요일 선택 바 (정확히 grid-cols-7 균등 분할, 절대 줄바꿈 없음) -->
@@ -696,7 +726,7 @@
             <span class="font-bold text-rose-500">━ 현재 시각</span>
           </div>
           <div class="overflow-x-auto pb-1">
-            <div class="min-w-[680px]">
+            <div id="weekScrollInner" class="min-w-[680px]">
               <div id="weekHeaderRow" class="grid grid-cols-[48px_repeat(7,minmax(88px,1fr))] gap-1 mb-1.5"></div>
               <div id="weekBodyGrid" class="grid grid-cols-[48px_repeat(7,minmax(88px,1fr))] gap-1"></div>
             </div>
@@ -1389,6 +1419,16 @@
         <span id="cloudSyncStatus" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ap-card ap-sub">연결 중…</span>
       </div>
 
+      <!-- 주간 자동 초기화 상태 -->
+      <div class="ap-tile p-3.5 space-y-1.5">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-extrabold ap-text">🔄 매주 월요일 자동 초기화</span>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-extrabold">사용 중</span>
+        </div>
+        <p class="text-[11px] ap-muted leading-relaxed">월요일이 되면 시간표를 기본 루틴으로 되돌리고 완료 체크를 새로 시작합니다.</p>
+        <p class="text-[11px] ap-sub font-bold">이번 주 기준일(월요일): <span id="settingsWeekKey" class="font-extrabold">-</span></p>
+      </div>
+
       <!-- JSON 데이터 백업 / 불러오기 -->
       <div class="ap-tile p-3.5 space-y-2">
         <div class="text-xs font-extrabold ap-text">💾 데이터 백업 · 복원 (JSON)</div>
@@ -1450,6 +1490,14 @@
     const GRID_END_MIN = 24 * 60;   // 24:00
     const PX_PER_MIN = 0.88;
 
+    // 전체 7일 보기 확대·축소 단계 (한눈에 = 하루 16시간이 화면 한 장에 들어오는 압축 모드)
+    const WEEK_ZOOM_LEVELS = {
+      fit:    { px: 0.40, hourStep: 2, minBlockH: 9,  label: '한눈에' },
+      normal: { px: 0.88, hourStep: 1, minBlockH: 26, label: '보통' },
+      large:  { px: 1.25, hourStep: 1, minBlockH: 30, label: '크게' }
+    };
+    const DEFAULT_WEEK_ZOOM = 'fit';
+
     const KEYS = {
       EVENTS: 'unyango_v5_events',
       CHECKS: 'unyango_v5_checks',
@@ -1457,6 +1505,8 @@
       BOOKS: 'unyango_v5_books',
       THEME: 'unyango_v5_theme',
       TT_MODE: 'unyango_v5_tt_mode',
+      WEEK_ZOOM: 'unyango_v5_week_zoom',
+      WEEK: 'unyango_v5_week_key',
       PIN_HASH: 'unyango_v5_pin_hash',
       UNLOCKED: 'unyango_v5_unlocked',
       W_CFG: 'unyango_v5_widget_cfg'
@@ -1526,13 +1576,13 @@
       { id: 'w4', day: 2, start: '22:20', end: '23:40', cat: 'society',  title: '통합사회2 문풀', book: '자이스토리 사회', desc: '도표·사례 분석 문제 집중 풀이 및 오답 선지 정리', color: '' },
 
       // 목 (3)
-      { id: 'th1', day: 3, start: '08:30', end: '17:00', cat: 'school',   title: '학교 수업', book: '자투리: 한국사 연표', desc: '일찍 하교할 경우 오후 시간에 수학 숙제 미리 끝내기', color: '' },
+      { id: 'th1', day: 3, start: '08:30', end: '16:00', cat: 'school',   title: '학교 수업', book: '자투리: 한국사 연표', desc: '목요일은 4시 하교 · 남는 오후에 수학 숙제 미리 끝내기', color: '' },
       { id: 'th2', day: 3, start: '17:20', end: '20:20', cat: 'academy',  title: '수학 학원', book: '공통수학2 교재', desc: '고난도 문항 질문 해결 및 풀이 과정 점검', color: '' },
       { id: 'th3', day: 3, start: '21:10', end: '22:30', cat: 'homework', title: '수학 학원 숙제', book: '수학 당일 숙제', desc: '토요일 학원 전 밀리지 않게 핵심 유형 1차 완성', color: '' },
       { id: 'th4', day: 3, start: '22:30', end: '23:40', cat: 'history',  title: '한국사2 핵심 흐름', book: '1등급마스터 한국사', desc: '시험 마지막 날 과목 · 평일은 핵심 흐름과 대표 기출 위주', color: '' },
 
       // 금 (4)
-      { id: 'f1', day: 4, start: '08:30', end: '17:00', cat: 'school',   title: '학교 수업', book: '자투리: 사·과 오답 복습', desc: '주중 틀린 사회·과학 문제 눈으로 빠르게 회독', color: '' },
+      { id: 'f1', day: 4, start: '08:30', end: '16:00', cat: 'school',   title: '학교 수업', book: '자투리: 사·과 오답 복습', desc: '금요일은 4시 하교 · 주중 틀린 사회·과학 문제 눈으로 빠르게 회독', color: '' },
       { id: 'f2', day: 4, start: '18:00', end: '20:00', cat: 'academy',  title: '영어 학원', book: '영어 학원 교재', desc: '주간 테스트 및 변형 문제 실전 연습', color: '' },
       { id: 'f3', day: 4, start: '20:30', end: '22:00', cat: 'science',  title: '통합과학2 개념·유형', book: '완자 / 완자 기출픽 과학', desc: '주중 취약 단원 완자 복습 후 기출픽 마무리', color: '' },
       { id: 'f4', day: 4, start: '22:00', end: '23:40', cat: 'history',  title: '한국사2 기출 정리', book: '1등급마스터 / 자이스토리', desc: '사료 핵심 키워드 밑줄 치며 연대기 암기', color: '' },
@@ -1629,7 +1679,7 @@
     const SB_URL = 'https://ulaxmsssquhchwuxxdeq.supabase.co';
     const SB_KEY = 'sb_publishable_8jVnRXyQKvvQp73TaKgaug_2WLNWwPL';
     const SB_TABLE = 'planner_kv';
-    const SYNC_KEYS = [KEYS.EVENTS, KEYS.CHECKS, KEYS.TODOS, KEYS.BOOKS, KEYS.PIN_HASH];
+    const SYNC_KEYS = [KEYS.EVENTS, KEYS.CHECKS, KEYS.TODOS, KEYS.BOOKS, KEYS.PIN_HASH, KEYS.WEEK];
 
     const sbState = {
       ready: false,      // 첫 클라우드 읽기 완료 여부
@@ -1668,6 +1718,7 @@
         case KEYS.TODOS: return todos;
         case KEYS.BOOKS: return books;
         case KEYS.PIN_HASH: return readRawPin();
+        case KEYS.WEEK: return weekKey;
         default: return undefined;
       }
     }
@@ -1679,6 +1730,7 @@
         case KEYS.CHECKS: checkMap = val; break;
         case KEYS.TODOS: todos = val; break;
         case KEYS.BOOKS: books = val; break;
+        case KEYS.WEEK: weekKey = val; break;
         default: break;
       }
       try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
@@ -1771,6 +1823,13 @@
         }
 
         if (key === KEYS.EVENTS && !Array.isArray(val)) return;
+        if (key === KEYS.WEEK) {
+          // 주 기준일은 '더 새로운 주'만 채택한다 (기기 시계·오프라인 오차로 과거 키가 되살아나는 것을 방지)
+          if (typeof val !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(val)) return;
+          if (weekKey && val <= weekKey) { sbState.cloudJson[key] = sbJson(val); return; }
+          sbSetLocal(key, val);
+          return;
+        }
         if (key !== KEYS.EVENTS && !(Array.isArray(val) || typeof val === 'object')) return;
 
         if (sbJson(sbGetLocal(key)) === sbJson(val)) { sbState.cloudJson[key] = sbJson(val); return; }
@@ -1785,6 +1844,7 @@
       [KEYS.EVENTS, KEYS.CHECKS, KEYS.TODOS, KEYS.BOOKS].forEach(key => {
         if (cloud[key] === undefined) queueCloudWrite(key, sbGetLocal(key));
       });
+      if (cloud[KEYS.WEEK] === undefined && weekKey) queueCloudWrite(KEYS.WEEK, weekKey);
     }
 
     async function sbPull(opts) {
@@ -1810,14 +1870,17 @@
           seedMissingKeys(cloud);
           Object.keys(sbState.pending).forEach(k => flushCloudWrite(k));
         }
+        // 클라우드의 주 기준일까지 확인한 뒤에야 주간 초기화를 판정한다
+        const weeklyReset = maybeWeeklyReset();
         updateSyncStatusUI();
 
-        if (changed) {
+        if (changed || weeklyReset) {
           if (typeof IS_WIDGET_MODE !== 'undefined' && IS_WIDGET_MODE) renderStandaloneWidget();
-          else renderAllViews();
+          else if (!document.body.classList.contains('is-locked')) renderAllViews();
         }
       } catch (e) {
         sbState.online = false;
+        maybeWeeklyReset();   // 클라우드 확인이 안 된 경우에는 기기 기준으로만 판정
         if (!silent) notifySyncError();
         else updateSyncStatusUI();
       } finally {
@@ -1856,6 +1919,10 @@
     let books = readStore(KEYS.BOOKS, JSON.parse(JSON.stringify(DEFAULT_BOOKS)));
     let currentTheme = readStore(KEYS.THEME, 'light');
     let ttMode = readStore(KEYS.TT_MODE, window.innerWidth < 768 ? 'day' : 'week');
+    let weekZoom = readStore(KEYS.WEEK_ZOOM, DEFAULT_WEEK_ZOOM);
+    if (!WEEK_ZOOM_LEVELS[weekZoom]) weekZoom = DEFAULT_WEEK_ZOOM;
+    let weekKey = readStore(KEYS.WEEK, '');   // 이번 주 기준일(월요일) 'YYYY-MM-DD'
+    let resetToastPending = false;
     let widgetCfg = readStore(KEYS.W_CFG, { theme: 'dark', size: 'standard', show: ['now', 'next', 'book', 'todo'] });
 
     let activeTab = 'home';
@@ -1896,6 +1963,44 @@
     function getTodayIso() {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    /* ---- 주간 루틴 자동 초기화 (매주 월요일) ----
+       한국 시간(KST) 기준 이번 주 월요일 날짜를 구해 두고, 저장된 주 기준일보다
+       더 새로운 주가 시작됐으면 시간표를 기본 루틴으로 되돌리고 완료 체크를 비운다.
+       주 기준일은 클라우드(planner_kv)에도 동기화해 폰·PC가 같은 주를 바라본다. */
+    function kstWeekMonday() {
+      const now = new Date();
+      const kst = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 9 * 3600000);
+      const back = (kst.getDay() + 6) % 7; // 월=0 ... 일=6
+      kst.setDate(kst.getDate() - back);
+      return `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-${String(kst.getDate()).padStart(2, '0')}`;
+    }
+
+    // 주 기준일이 없으면 이번 주로 채우기만 하고, 지난 주였을 때만 초기화한다.
+    function maybeWeeklyReset() {
+      const cur = kstWeekMonday();
+      if (!weekKey) {
+        weekKey = cur;
+        writeStore(KEYS.WEEK, weekKey);
+        return false;
+      }
+      if (!(weekKey < cur)) return false;
+
+      events = JSON.parse(JSON.stringify(DEFAULT_EVENTS));
+      checkMap = {};
+      weekKey = cur;
+      writeStore(KEYS.EVENTS, events);
+      writeStore(KEYS.CHECKS, checkMap);
+      writeStore(KEYS.WEEK, weekKey);
+
+      if (document.body.classList.contains('is-locked')) {
+        resetToastPending = true;   // 잠금화면 아래에서 초기화됐으면 풀린 뒤에 안내
+      } else if (typeof IS_WIDGET_MODE !== 'undefined' && !IS_WIDGET_MODE) {
+        renderAllViews();
+        showToast('🔄 새로운 한 주! 기본 루틴으로 초기화했습니다');
+      }
+      return true;
     }
 
     function getNowTimeObj() {
@@ -2178,6 +2283,10 @@
         lockEl.classList.remove('is-hiding');
       }
       renderAllViews();
+      if (resetToastPending) {
+        resetToastPending = false;
+        showToast('🔄 새로운 한 주! 기본 루틴으로 초기화했습니다');
+      }
     }
 
     function handlePinUnlock(e) {
@@ -2229,6 +2338,8 @@
       if (badge) {
         badge.textContent = custom ? '변경됨 ✓' : '파일 기본값';
       }
+      const wkEl = document.getElementById('settingsWeekKey');
+      if (wkEl) wkEl.textContent = `${weekKey || kstWeekMonday()} (월)`;
       updateSyncStatusUI();
       document.getElementById('newPinField').value = '';
       cancelReset('Check');
@@ -2711,12 +2822,14 @@
         dayBar.classList.remove('hidden');
         dayBox.classList.remove('hidden');
         weekBox.classList.add('hidden');
+        updateWeekZoomUI();
         renderDaySelectorBar();
         renderDaySchedule();
       } else {
         dayBar.classList.add('hidden');
         dayBox.classList.add('hidden');
         weekBox.classList.remove('hidden');
+        updateWeekZoomUI();
         renderWeekGrid();
       }
     }
@@ -2879,24 +2992,56 @@
       return placed;
     }
 
+    function setWeekZoom(level) {
+      if (!WEEK_ZOOM_LEVELS[level]) return;
+      weekZoom = level;
+      writeStore(KEYS.WEEK_ZOOM, level);
+      updateWeekZoomUI();
+      renderWeekGrid();
+      showToast(`🔍 주간 화면을 '${WEEK_ZOOM_LEVELS[level].label}' 크기로 바꿨습니다`);
+    }
+
+    function updateWeekZoomUI() {
+      const isWeek = ttMode === 'week';
+      const bar = document.getElementById('weekZoomBar');
+      if (bar) {
+        bar.classList.toggle('hidden', !isWeek);
+        bar.classList.toggle('flex', isWeek);
+      }
+      ['fit', 'normal', 'large'].forEach(k => {
+        const b = document.getElementById('weekZoomBtn-' + k);
+        if (b) b.classList.toggle('on', weekZoom === k);
+      });
+      const wrap = document.getElementById('weekScheduleContainer');
+      if (wrap) {
+        wrap.classList.toggle('week-zoom-fit', weekZoom === 'fit');
+        wrap.classList.toggle('week-zoom-large', weekZoom === 'large');
+      }
+    }
+
     function renderWeekGrid() {
       const hdr = document.getElementById('weekHeaderRow');
       const body = document.getElementById('weekBodyGrid');
       if (!hdr || !body) return;
+      updateWeekZoomUI();
 
+      const zoom = WEEK_ZOOM_LEVELS[weekZoom] || WEEK_ZOOM_LEVELS.normal;
+      const pxm = zoom.px;
+      const isFit = weekZoom === 'fit';
+      const isLarge = weekZoom === 'large';
       const now = getNowTimeObj();
-      const totalH = (GRID_END_MIN - GRID_START_MIN) * PX_PER_MIN;
+      const totalH = Math.round((GRID_END_MIN - GRID_START_MIN) * pxm);
 
-      hdr.innerHTML = `<div class="sticky-time-col text-[10px] font-bold ap-muted flex items-end justify-center pb-1">시간</div>` +
+      hdr.innerHTML = `<div class="sticky-time-col ${isFit ? 'text-[8px]' : 'text-[10px]'} font-bold ap-muted flex items-end justify-center pb-1">시간</div>` +
         DAY_NAMES.map((name, idx) => {
           const isToday = idx === now.dayIdx;
-          return `<div class="text-center py-1.5 rounded-xl text-xs font-extrabold ${isToday ? 'mono-invert bg-blue-600 text-white' : 'ap-tile ap-text'}">${name}${isToday ? '·오늘' : ''}</div>`;
+          return `<div class="text-center ${isFit ? 'py-[3px] text-[9px] rounded-lg' : 'py-1.5 text-xs rounded-xl'} font-extrabold ${isToday ? 'mono-invert bg-blue-600 text-white' : 'ap-tile ap-text'}">${name}${isToday ? '·오늘' : ''}</div>`;
         }).join('');
 
-      let axis = `<div class="sticky-time-col relative pr-1.5" style="height:${totalH}px;">`;
-      for (let h = 8; h <= 23; h++) {
-        const top = (h * 60 - GRID_START_MIN) * PX_PER_MIN;
-        axis += `<div style="top:${top}px;" class="absolute inset-x-0 text-[10px] font-bold ap-muted text-right pr-1.5 -translate-y-1.5 tabular-nums">${String(h).padStart(2, '0')}:00</div>`;
+      let axis = `<div class="sticky-time-col relative ${isFit ? 'pr-0.5' : 'pr-1.5'}" style="height:${totalH}px;">`;
+      for (let h = 8; h <= 23; h += zoom.hourStep) {
+        const top = (h * 60 - GRID_START_MIN) * pxm;
+        axis += `<div style="top:${top}px;" class="absolute inset-x-0 ${isFit ? 'text-[8px] pr-0.5' : 'text-[10px] pr-1.5'} font-bold ap-muted text-right -translate-y-1.5 tabular-nums">${String(h).padStart(2, '0')}:00</div>`;
       }
       axis += `</div>`;
 
@@ -2905,14 +3050,14 @@
         const isToday = d === now.dayIdx;
         let lines = '';
         for (let h = 8; h <= 23; h++) {
-          const top = (h * 60 - GRID_START_MIN) * PX_PER_MIN;
-          lines += `<div style="top:${top}px; border-color: var(--border);" class="absolute inset-x-0 border-t opacity-55"></div>`;
+          const top = (h * 60 - GRID_START_MIN) * pxm;
+          lines += `<div style="top:${top}px; border-color: var(--border);" class="absolute inset-x-0 border-t ${zoom.hourStep > 1 ? 'opacity-35' : 'opacity-55'}"></div>`;
         }
 
         let nowLine = '';
         if (isToday && now.totalMin >= GRID_START_MIN && now.totalMin <= GRID_END_MIN) {
-          const top = (now.totalMin - GRID_START_MIN) * PX_PER_MIN;
-          nowLine = `<div style="top:${top}px;" class="absolute inset-x-0 h-[2px] bg-rose-500 z-20 pointer-events-none"><span class="absolute -left-1 -top-[3px] w-2 h-2 rounded-full bg-rose-500"></span></div>`;
+          const top = (now.totalMin - GRID_START_MIN) * pxm;
+          nowLine = `<div style="top:${top}px;" class="absolute inset-x-0 ${isFit ? 'h-[1.5px]' : 'h-[2px]'} bg-rose-500 z-20 pointer-events-none"><span class="absolute -left-1 -top-[3px] w-2 h-2 rounded-full bg-rose-500"></span></div>`;
         }
 
         const placed = computeOverlapLanes(events.filter(e => e.day === d));
@@ -2921,32 +3066,34 @@
           const ce = Math.min(GRID_END_MIN, e);
           if (ce <= cs) return '';
 
-          const top = (cs - GRID_START_MIN) * PX_PER_MIN;
-          const height = Math.max(26, (ce - cs) * PX_PER_MIN - 2);
+          const top = (cs - GRID_START_MIN) * pxm;
+          const height = Math.max(zoom.minBlockH, (ce - cs) * pxm - (isFit ? 1 : 2));
           const wPct = 100 / colCnt;
           const lPct = lane * wPct;
           const vis = getEventVisualStyle(ev);
           const done = isDone(ev.id);
           const dim = subjectFilter !== 'all' && ev.cat !== subjectFilter;
           const isNow = isToday && now.totalMin >= s && now.totalMin < e;
+          const padCls = isFit ? 'rounded-md p-[2px]' : (isLarge ? 'rounded-xl p-2' : 'rounded-xl p-1.5');
+          const titleCls = isFit ? 'text-[8px] leading-[1.05]' : (isLarge ? 'text-[12px] leading-tight' : 'text-[11px] leading-tight');
 
           return `
             <div onclick="openDetailModal('${ev.id}')"
               data-cat="${ev.cat}" ${vis.customAttr}
               style="top:${top}px; height:${height}px; left:calc(${lPct}% + 1px); width:calc(${wPct}% - 2px); ${vis.style}"
-              class="ev-block absolute rounded-xl border p-1.5 overflow-hidden cursor-pointer hover:z-20 ${dim ? 'ev-dimmed' : ''} ${done ? 'ev-done' : ''} ${isNow ? 'ev-now-ring' : ''}">
+              class="ev-block absolute border ${padCls} overflow-hidden cursor-pointer hover:z-20 ${dim ? 'ev-dimmed' : ''} ${done ? 'ev-done' : ''} ${isNow ? 'ev-now-ring' : ''}">
               <div class="flex items-start justify-between gap-0.5">
-                <span class="ev-title text-[11px] font-extrabold leading-tight line-clamp-2">${esc(ev.title)}</span>
-                <button type="button" onclick="toggleEventCheck('${ev.id}', event)"
-                  class="w-4 h-4 rounded border ${done ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white/75 border-current text-transparent'} flex items-center justify-center text-[9px] font-black shrink-0">✓</button>
+                <span class="ev-title ${titleCls} font-extrabold line-clamp-2">${esc(ev.title)}</span>
+                ${isFit ? '' : `<button type="button" onclick="toggleEventCheck('${ev.id}', event)"
+                  class="w-4 h-4 rounded border ${done ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white/75 border-current text-transparent'} flex items-center justify-center text-[9px] font-black shrink-0">✓</button>`}
               </div>
-              ${height > 44 ? `<div class="ev-sub text-[9px] font-bold mt-0.5 truncate tabular-nums" style="${vis.subStyle}">${ev.start}~${ev.end}</div>` : ''}
-              ${height > 62 && ev.book ? `<div class="ev-sub text-[9px] mt-0.5 truncate" style="${vis.subStyle}">📖 ${esc(ev.book)}</div>` : ''}
+              ${height > (isFit ? 34 : 44) ? `<div class="ev-sub text-[9px] font-bold mt-0.5 truncate tabular-nums" style="${vis.subStyle}">${ev.start}~${ev.end}</div>` : ''}
+              ${height > (isFit ? 46 : 62) && ev.book ? `<div class="ev-sub text-[9px] mt-0.5 truncate" style="${vis.subStyle}">📖 ${esc(ev.book)}</div>` : ''}
             </div>
           `;
         }).join('');
 
-        cols += `<div style="height:${totalH}px; background-color: var(--tile); border-color: var(--border);" class="relative rounded-xl border ${isToday ? 'ring-1 ring-blue-500/40' : ''}">${lines}${blocks}${nowLine}</div>`;
+        cols += `<div style="height:${totalH}px; background-color: var(--tile); border-color: var(--border);" class="week-day-col relative ${isFit ? 'rounded-md' : 'rounded-xl'} border ${isToday ? 'ring-1 ring-blue-500/40' : ''}">${lines}${blocks}${nowLine}</div>`;
       }
 
       body.innerHTML = axis + cols;
@@ -4074,9 +4221,11 @@ Script.complete();`;
       events = JSON.parse(JSON.stringify(DEFAULT_EVENTS));
       books = JSON.parse(JSON.stringify(DEFAULT_BOOKS));
       checkMap = {};
+      weekKey = kstWeekMonday();   // 수동 복원도 이번 주 기준으로 다시 시작
       writeStore(KEYS.EVENTS, events);
       writeStore(KEYS.BOOKS, books);
       writeStore(KEYS.CHECKS, checkMap);
+      writeStore(KEYS.WEEK, weekKey);
       cancelReset('All');
       closeModal('settingsModal');
       renderAllViews();
