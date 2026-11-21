@@ -1294,11 +1294,11 @@
       <!-- 모드 전환 (집중 / 짧은 휴식 / 긴 휴식) -->
       <div class="w-full space-y-2">
         <div class="grid grid-cols-3 gap-1.5">
-          <button type="button" data-fs-phase="focus" onclick="setTimerPhase('focus')"
+          <button type="button" data-fs-phase="focus" data-fs-min="25" onclick="setTimerPhase('focus')"
             class="fs-phase-btn tap-btn py-2.5 px-1 rounded-xl text-[11px] font-extrabold">🔥 집중 25</button>
-          <button type="button" data-fs-phase="short" onclick="setTimerPhase('short')"
+          <button type="button" data-fs-phase="short" data-fs-min="5" onclick="setTimerPhase('short')"
             class="fs-phase-btn tap-btn py-2.5 px-1 rounded-xl text-[11px] font-extrabold">☕ 휴식 5</button>
-          <button type="button" data-fs-phase="long" onclick="setTimerPhase('long')"
+          <button type="button" data-fs-phase="long" data-fs-min="15" onclick="setTimerPhase('long')"
             class="fs-phase-btn tap-btn py-2.5 px-1 rounded-xl text-[11px] font-extrabold">🛋️ 긴 휴식 15</button>
         </div>
         <div class="flex items-center justify-center gap-1.5">
@@ -3024,7 +3024,7 @@
         timerLabel = preset === 10 ? '10분 휴식 타이머' : `${preset}분 집중 타이머`;
       }
       updateTimerUI();
-      showToast(`⏱️ ${timerLabel}로 맞췄습니다`);
+      showToast(`⏱️ ${timerLabel} 설정 완료`);
     }
 
     // 뽀모도로 단계 전환 (집중 25 / 짧은 휴식 5 / 긴 휴식 15)
@@ -3037,7 +3037,7 @@
       timerRemainSec = timerTotalSec;
       timerLabel = `${conf.min}분 ${conf.label} 타이머`;
       updateTimerUI();
-      showToast(phase === 'focus' ? `🔥 ${conf.min}분 집중으로 맞췄습니다` : `${conf.emoji} ${conf.min}분 ${conf.label} 타이머로 맞췄습니다`);
+      showToast(phase === 'focus' ? `🔥 ${conf.min}분 집중 설정 완료` : `${conf.emoji} ${conf.min}분 ${conf.label} 설정 완료`);
     }
 
     // 전체 화면에서 직접 입력한 시간(분)으로 맞춘다
@@ -3054,7 +3054,7 @@
       timerRemainSec = timerTotalSec;
       timerLabel = `${mins}분 맞춤 타이머`;
       updateTimerUI();
-      showToast(`⏱️ ${mins}분으로 맞췄습니다`);
+      showToast(`⏱️ ${mins}분 설정 완료`);
     }
 
     function syncFocusTimerToNow() {
@@ -3164,7 +3164,8 @@
       }
 
       document.querySelectorAll('.fs-phase-btn').forEach(b => {
-        b.classList.toggle('is-active', b.dataset.fsPhase === timerPhase);
+        const on = b.dataset.fsPhase === timerPhase && Number(b.dataset.fsMin) * 60 === timerTotalSec;
+        b.classList.toggle('is-active', on);
       });
     }
 
