@@ -514,6 +514,9 @@
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
       touch-action: manipulation;
+      /* 아이폰 노치·홈 인디케이터 영역을 피한다 */
+      padding-top: calc(16px + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     }
     #timerFullscreen > .modal-sheet {
       max-height: 100%;
