@@ -179,7 +179,7 @@ def fetch_week(school_name: str, local_code: int, school_code: int, week_num: in
         except (urllib.error.URLError, TimeoutError, OSError) as error:
             last_error = error
             time.sleep(5 * (attempt + 1))
-    fail(f'컴시간 서버 요청이 실패했습니다: {last_error}')
+    raise RuntimeError(f'컴시간 서버 요청이 실패했습니다: {last_error}')
 
 
 def upsert(payload: dict) -> None:
@@ -223,14 +223,17 @@ def main() -> None:
     local_code, school_code = resolve_school_codes(school_name)
     log('학교 코드 확인 완료')
 
-    current = fetch_week(school_name, local_code, school_code, 0)
+    try:
+        current = fetch_week(school_name, local_code, school_code, 0)
+    except RuntimeError as error:
+        fail(f'이번 주 시간표를 가져오지 못했습니다: {error}')
     current_week, current_count = build_week(current, grade, cls, this_monday, 'current')
     next_week, next_count = build_week(current, grade, cls, this_monday + dt.timedelta(days=7), 'next')
 
     try:
         following = fetch_week(school_name, local_code, school_code, 1)
         next_week, next_count = build_week(following, grade, cls, this_monday + dt.timedelta(days=7), 'next')
-    except RuntimeError as error:
+    except (RuntimeError, SystemExit) as error:
         log(f'다음 주 시간표를 가져오지 못했습니다 (이번 주만 저장): {error}')
 
     if current_count == 0:
