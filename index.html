@@ -4481,7 +4481,8 @@ Script.complete();`;
       grid.style.display = '';
 
       const synced = ccFmtSync(comciganData.synced_at);
-      const upd = String(comciganData.update_date || '').trim();
+      const updRaw = String(comciganData.update_date || '').trim();
+      const upd = updRaw ? updRaw.slice(0, 10).replace(/-/g, '.') : '';
       const metaParts = [];
       if (synced) metaParts.push(`마지막 동기화 ${synced}`);
       if (upd) metaParts.push(`컴시간 갱신 ${upd}`);
