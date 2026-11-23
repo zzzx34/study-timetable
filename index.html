@@ -934,13 +934,21 @@
             </button>
           </div>
 
-          <div id="todoSummaryGrid" class="grid grid-cols-3 gap-2"></div>
+          <div id="todoSummaryGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
 
           <div class="ap-seg grid-cols-4">
             <button type="button" id="todoFilter-all" onclick="setTodoFilter('all')" class="on">전체</button>
             <button type="button" id="todoFilter-active" onclick="setTodoFilter('active')">진행중</button>
             <button type="button" id="todoFilter-period" onclick="setTodoFilter('period')">수행평가</button>
             <button type="button" id="todoFilter-done" onclick="setTodoFilter('done')">완료</button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-bold ap-muted shrink-0">정렬</span>
+            <div class="ap-seg grid-cols-2 flex-1">
+              <button type="button" id="todoSortBtn-priority" onclick="setTodoSort('priority')" class="on">🔴 우선순위</button>
+              <button type="button" id="todoSortBtn-due" onclick="setTodoSort('due')">📅 마감일</button>
+            </div>
           </div>
         </div>
 
@@ -1492,6 +1500,15 @@
           <button type="button" id="tdTypeBtn-normal" onclick="setTodoDraftType('normal')">📝 일반 투두</button>
         </div>
 
+        <div>
+          <label class="block text-[11px] font-bold ap-sub mb-1">우선순위</label>
+          <div class="ap-seg grid-cols-3">
+            <button type="button" id="tdPrioBtn-high" onclick="setTodoDraftPriority('high')">🔴 높음</button>
+            <button type="button" id="tdPrioBtn-med" onclick="setTodoDraftPriority('med')" class="on">🟡 보통</button>
+            <button type="button" id="tdPrioBtn-low" onclick="setTodoDraftPriority('low')">⚪ 낮음</button>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           <div class="min-w-0">
             <label class="block text-[11px] font-bold ap-sub mb-1">과목</label>
@@ -1592,7 +1609,7 @@
             <input type="number" id="bkEditCur" min="0" required class="w-full px-3 py-2.5 rounded-xl text-sm font-extrabold tabular-nums">
           </div>
           <div>
-            <label class="block text-[11px] font-bold ap-sub mb-1">전체 쪽수 (p)</label>
+            <label class="block text-[11px] font-bold ap-sub mb-1">시험범위 쪽수 (p)</label>
             <input type="number" id="bkEditTot" min="1" required class="w-full px-3 py-2.5 rounded-xl text-sm font-bold tabular-nums">
           </div>
         </div>
@@ -1803,6 +1820,7 @@
       PIN_HASH: 'unyango_v5_pin_hash',
       UNLOCKED: 'unyango_v5_unlocked',
       W_CFG: 'unyango_v5_widget_cfg',
+      TODO_SORT: 'unyango_v5_todo_sort',
       COMCIGAN: 'unyango_v5_comcigan',
       COMCIGAN_CACHE: 'unyango_v5_comcigan_cache',
       COMCIGAN_WEEK: 'unyango_v5_comcigan_week'
@@ -1899,14 +1917,15 @@
       { id: 'su6', day: 6, start: '21:30', end: '23:00', cat: 'society',  title: '사·과 주간 오답 백지복습', book: '자이스토리 / 완자 오답', desc: '이번 주 틀린 사회·과학 개념 백지 인출 테스트', color: '' }
     ];
 
-    // 기본 교재 6권
+    // 기본 교재 6권 — totalPage는 2학기 기말 시험범위에 해당하는 쪽수,
+    // location은 교재 실제 페이지 범위(목차 기준)를 적는다.
     const DEFAULT_BOOKS = [
-      { id: 'b1', subject: '통합사회2', title: '자이스토리 사회', currentPage: 0, totalPage: 120, location: '시작 전 · 1순위 최우선 공략', note: '12/9(수) 첫날 시험! 12월 첫째 주까지 1회독+오답 완료' },
-      { id: 'b2', subject: '통합과학2', title: '완자 과학', currentPage: 0, totalPage: 110, location: '시작 전 · 기본 개념 정리용', note: '학교 프린트와 함께 핵심 개념 빠르게 정독' },
-      { id: 'b3', subject: '통합과학2', title: '완자 기출픽 과학', currentPage: 0, totalPage: 95, location: '시작 전 · 내신 빈출 핵심', note: '12/11(금) 시험 대비 빈출 유형 2회독 추천' },
-      { id: 'b4', subject: '통합과학2', title: '1등급마스터 과학', currentPage: 0, totalPage: 80, location: '시작 전 · 고난도 선별', note: '시간 절약을 위해 고난도·서술형 변별력 문항 선별 풀이' },
-      { id: 'b5', subject: '한국사2',   title: '1등급마스터 한국사', currentPage: 0, totalPage: 85, location: '시작 전 · 평일 흐름 정리', note: '12/16(수) 마지막 날 시험 · 평일 핵심 흐름 파악' },
-      { id: 'b6', subject: '한국사2',   title: '자이스토리 한국사', currentPage: 0, totalPage: 115, location: '시작 전 · 주말·직전 문풀', note: '주말 및 시험 기간(12/12~15) 집중 문제풀이·사료 암기' }
+      { id: 'b1', subject: '통합사회2', title: '자이스토리 통합사회2', currentPage: 0, totalPage: 60, location: '범위 p.75~157 · 8소단원 60쪽', note: '07 합리적 선택 p.75~83 / 08 자산 관리 84~91 / 09 국제무역 92~98 / 11 평화 114~119 / 12 남북 분단 120~127 / 13 인구 136~144 / 14 에너지 145~152 / 15 미래사회 153~157' },
+      { id: 'b2', subject: '통합과학2', title: '완자 통합과학2', currentPage: 0, totalPage: 72, location: '범위 p.64~165 · 7소단원 72쪽', note: 'I-2-02 산·염기와 중화반응 p.64~77 / I-2-03 물질 변화와 에너지 출입 78~89 / II-1-01 생물과 환경 100~109 / II-1-02 생태계평형 110~119 / II-2-01 태양 에너지 140~145 / II-2-02 발전과 에너지원 146~155 / II-2-03 에너지 효율 156~165' },
+      { id: 'b3', subject: '통합과학2', title: '완자 기출픽 통합과학2', currentPage: 0, totalPage: 144, location: '범위 쪽수 미확인 · 본책 144쪽', note: '06 산과 염기 / 07 중화 반응 / 08 물질 변화와 에너지 출입 / 09 생물과 환경 / 10 생태계평형 / 13 태양 에너지 / 14 발전과 에너지원 / 15 에너지 효율 · 11·12는 1차 범위' },
+      { id: 'b4', subject: '통합과학2', title: '올백 1등급 마스터 통합과학2', currentPage: 0, totalPage: 256, location: '범위 쪽수 미확인 · 전체 256쪽', note: '04 산화·환원 / 05 산·염기 중화 반응 / 06 물질 변화와 에너지 출입 / 07 생물과 환경 / 08 생태계평형 / 10 태양 에너지 / 11 전기 생산의 원리 / 12 에너지 효율·신재생 · 09는 1차 범위' },
+      { id: 'b5', subject: '한국사2',   title: '올백 1등급 마스터 한국사2', currentPage: 0, totalPage: 208, location: '범위 쪽수 미확인 · 전체 208쪽', note: 'II 대한민국의 발전 01~05 / III 오늘날의 대한민국 01~03 전체' },
+      { id: 'b6', subject: '한국사2',   title: '자이스토리 내신한국사2', currentPage: 0, totalPage: 76, location: '범위 p.74~155 · 7소단원 76쪽', note: '06 냉전 체제·정부 수립 p.74~85 / 07 6·25와 분단 고착 86~95 / 08 민주화 96~109 / 09 산업화 110~121 / 10 6월 항쟁 이후 128~135 / 11 외환 위기 136~143 / 12 분단 극복·동아시아 평화 144~155' }
     ];
 
     // 기본 투두·수행평가 예시
@@ -1920,6 +1939,7 @@
         dueDate: '2026-11-27',
         memo: '눌러서 본인 수행평가 일정으로 수정하거나 삭제하세요',
         done: false,
+        priority: 'high',
         subtasks: [
           { id: 'st1', text: '주제 선정 및 자료 조사', done: false },
           { id: 'st2', text: '초안 작성 및 검토', done: false },
@@ -1935,9 +1955,26 @@
         dueDate: '2026-11-21',
         memo: '교재 탭에서 각 교재의 실제 쪽수를 맞추면 진도율이 정확해져요',
         done: false,
+        priority: 'med',
         subtasks: []
       }
     ];
+
+    // 투두 우선순위 (높음 → 보통 → 낮음)
+    const TODO_PRIORITIES = ['high', 'med', 'low'];
+    // 카드 배지를 누를 때 올라가는 순서 (낮음 → 보통 → 높음)
+    const PRIORITY_CYCLE = ['low', 'med', 'high'];
+    const PRIORITY_META = {
+      high: { label: '높음', dot: '🔴', badge: 'bg-rose-500/15 text-rose-500', ring: 'border-rose-500/70' },
+      med:  { label: '보통', dot: '🟡', badge: 'bg-amber-500/15 text-amber-500', ring: 'border-amber-400/50' },
+      low:  { label: '낮음', dot: '⚪', badge: 'ap-tile ap-muted', ring: 'ap-border' }
+    };
+    function todoPriority(t) {
+      return (t && (t.priority === 'high' || t.priority === 'low')) ? t.priority : 'med';
+    }
+    function priorityRank(t) {
+      return TODO_PRIORITIES.indexOf(todoPriority(t));
+    }
 
     // 2026 2학기 2차 정기시험 시간표 & 오후 전략
     const EXAM_SCHEDULE = [
@@ -2230,12 +2267,15 @@
     let selectedDayIdx = getTodayIdx();
     let subjectFilter = 'all';
     let todoFilter = 'all';
+    let todoSort = readStore(KEYS.TODO_SORT, 'priority');
+    if (todoSort !== 'due' && todoSort !== 'priority') todoSort = 'priority';
     let booksSubTab = 'books';
 
     let activeDetailId = null;
     let activeNowEventId = null;
     let draftEventColor = '';
     let draftTodoType = 'period';
+    let draftTodoPriority = 'med';
     let draftSubtasks = [];
     let uploadedIconImg = null;
     let cleanHtmlSnapshot = '';
@@ -3741,6 +3781,39 @@
       renderTodoView();
     }
 
+    function setTodoSort(s) {
+      todoSort = (s === 'due') ? 'due' : 'priority';
+      ['priority', 'due'].forEach(k => {
+        const b = document.getElementById(`todoSortBtn-${k}`);
+        if (b) b.classList.toggle('on', k === todoSort);
+      });
+      writeStore(KEYS.TODO_SORT, todoSort);
+      renderTodoView();
+    }
+
+    function setTodoDraftPriority(p) {
+      draftTodoPriority = (p === 'high' || p === 'low') ? p : 'med';
+      TODO_PRIORITIES.forEach(k => {
+        const b = document.getElementById(`tdPrioBtn-${k}`);
+        if (b) b.classList.toggle('on', k === draftTodoPriority);
+      });
+    }
+
+    function cycleTodoPriority(id) {
+      let nextLabel = '';
+      todos = todos.map(t => {
+        if (t.id !== id) return t;
+        const cur = todoPriority(t);
+        const next = PRIORITY_CYCLE[(PRIORITY_CYCLE.indexOf(cur) + 1) % PRIORITY_CYCLE.length];
+        nextLabel = PRIORITY_META[next].label;
+        return { ...t, priority: next };
+      });
+      writeStore(KEYS.TODOS, todos);
+      renderTodoView();
+      renderHomeRings();
+      if (nextLabel) showToast(`✅ 우선순위 → ${nextLabel}`);
+    }
+
     function calcPeriodProgress(startIso, dueIso) {
       if (!startIso || !dueIso) return 0;
       const s = new Date(startIso + 'T00:00:00').getTime();
@@ -3755,19 +3828,29 @@
       const wrap = document.getElementById('todoListWrap');
       if (!sumGrid || !wrap) return;
 
+      ['priority', 'due'].forEach(k => {
+        const b = document.getElementById(`todoSortBtn-${k}`);
+        if (b) b.classList.toggle('on', k === todoSort);
+      });
+
       const active = todos.filter(t => !t.done);
       const periodCnt = active.filter(t => t.type === 'period').length;
       const urgentCnt = active.filter(t => diffDays(t.dueDate) <= 3).length;
+      const highCnt = active.filter(t => todoPriority(t) === 'high').length;
       const doneCnt = todos.filter(t => t.done).length;
 
       sumGrid.innerHTML = `
+        <div class="ap-tile p-2.5 text-center">
+          <div class="text-[10px] font-bold text-rose-500">🔴 우선순위 높음</div>
+          <div class="text-xl font-black text-rose-500 tabular-nums mt-0.5">${highCnt}</div>
+        </div>
         <div class="ap-tile p-2.5 text-center">
           <div class="text-[10px] font-bold ap-muted">진행 중 수행</div>
           <div class="text-xl font-black ap-text tabular-nums mt-0.5">${periodCnt}</div>
         </div>
         <div class="ap-tile p-2.5 text-center">
-          <div class="text-[10px] font-bold text-rose-500">3일 이내 마감</div>
-          <div class="text-xl font-black text-rose-500 tabular-nums mt-0.5">${urgentCnt}</div>
+          <div class="text-[10px] font-bold text-amber-500">3일 이내 마감</div>
+          <div class="text-xl font-black text-amber-500 tabular-nums mt-0.5">${urgentCnt}</div>
         </div>
         <div class="ap-tile p-2.5 text-center">
           <div class="text-[10px] font-bold text-emerald-500">완료됨</div>
@@ -3780,7 +3863,14 @@
       else if (todoFilter === 'period') list = list.filter(t => t.type === 'period' && !t.done);
       else if (todoFilter === 'done') list = list.filter(t => t.done);
 
-      list.sort((a, b) => (a.done === b.done ? diffDays(a.dueDate) - diffDays(b.dueDate) : (a.done ? 1 : -1)));
+      // 미완료 → 완료 순, 그 안에서 선택한 기준(우선순위 / 마감일)으로 정렬
+      list.sort((a, b) => {
+        if (a.done !== b.done) return a.done ? 1 : -1;
+        if (todoSort === 'due') {
+          return (diffDays(a.dueDate) - diffDays(b.dueDate)) || (priorityRank(a) - priorityRank(b));
+        }
+        return (priorityRank(a) - priorityRank(b)) || (diffDays(a.dueDate) - diffDays(b.dueDate));
+      });
 
       if (!list.length) {
         wrap.innerHTML = `<div class="ap-card p-8 text-center text-xs font-bold ap-muted">해당하는 항목이 없습니다. 상단 ＋ 새 항목으로 추가해 보세요!</div>`;
@@ -3799,15 +3889,19 @@
         const subDone = subs.filter(s => s.done).length;
         const subPct = subs.length ? Math.round((subDone / subs.length) * 100) : 0;
         const timePct = t.type === 'period' ? calcPeriodProgress(t.startDate, t.dueDate) : 0;
+        const pr = todoPriority(t);
+        const prm = PRIORITY_META[pr];
 
         return `
-          <div class="ap-card p-4 space-y-2.5 ${t.done ? 'opacity-65' : ''}">
+          <div class="ap-card p-4 space-y-2.5 ${t.done ? 'opacity-65' : ''}"${(!t.done && pr === 'high') ? ' style="border-left:4px solid #f43f5e;"' : ''}>
             <div class="flex items-start justify-between gap-2.5">
               <div class="flex items-start gap-2.5 min-w-0 flex-1">
                 <button type="button" onclick="toggleTodoDone('${t.id}')"
                   class="mt-0.5 w-6 h-6 rounded-lg border-2 ${t.done ? 'bg-emerald-500 border-emerald-500 text-white mono-invert' : 'ap-border text-transparent'} flex items-center justify-center text-xs font-black shrink-0">✓</button>
                 <div class="min-w-0 flex-1 space-y-1">
                   <div class="flex items-center gap-1.5 flex-wrap">
+                    <button type="button" onclick="cycleTodoPriority('${t.id}')" title="눌러서 우선순위 변경"
+                      class="tap-btn px-2 py-0.5 rounded-md text-[10px] font-extrabold ${prm.badge}">${prm.dot} ${prm.label}</button>
                     <span class="px-2 py-0.5 rounded-md ap-tile text-[10px] font-extrabold ap-sub">${esc(t.subject)}</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${t.type === 'period' ? 'bg-indigo-500/15 text-indigo-400' : 'ap-tile ap-muted'}">${t.type === 'period' ? '📌 수행평가' : '📝 투두'}</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold tabular-nums ${dCls}">${dText}</span>
@@ -3929,6 +4023,7 @@
         document.getElementById('tdEditMemo').value = t.memo || '';
         draftSubtasks = JSON.parse(JSON.stringify(t.subtasks || []));
         setTodoDraftType(t.type || 'period');
+        setTodoDraftPriority(todoPriority(t));
         delArea.classList.remove('hidden');
       } else {
         document.getElementById('tdModalHeading').textContent = '＋ 새 투두 · 수행평가';
@@ -3940,6 +4035,7 @@
         document.getElementById('tdEditMemo').value = '';
         draftSubtasks = [];
         setTodoDraftType('period');
+        setTodoDraftPriority('med');
         delArea.classList.add('hidden');
       }
       document.getElementById('tdNewSubtaskInput').value = '';
@@ -3961,6 +4057,7 @@
         dueDate: document.getElementById('tdEditDue').value,
         memo: document.getElementById('tdEditMemo').value.trim(),
         done: prev ? prev.done : false,
+        priority: draftTodoPriority,
         subtasks: draftSubtasks
       };
       if (id) todos = todos.map(t => t.id === id ? item : t);
